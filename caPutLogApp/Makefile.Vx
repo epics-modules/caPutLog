@@ -1,0 +1,26 @@
+# Makefile.Vx
+TOP = ../..
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+APPNAME = caPutLog
+
+INC += caPutLog.h
+
+SRCS.c += ../RngLogTask.c
+SRCS.c += ../caPutLogRng.c
+SRCS.c += ../iocCAPutLogClient.c
+
+PROD = $(SRCS.c:../%.c=%.o)
+
+# The next lines are for dbd expansion
+#DBDEXPAND = caPutLog.dbdInc
+#DBDNAME = caPutLogApp.dbd
+
+#Note that the command line that builds the
+#library $(LIBNAME) may be HUGE (>3kB)
+#
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
