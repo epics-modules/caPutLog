@@ -34,28 +34,7 @@ INSTALL_FORM	= $(INSTALL_LOCATION)/form
 INSTALL_APPDEF	= $(INSTALL_LOCATION)/xresources
 INSTALL_CFGDATA	= $(INSTALL_LOCATION)/etc
 
-#Rdist stuff
-RDIST = rdist
-#Find out if make was called with -n option, if yes add rdist option -v
-MAKEOPTS = $(firstword $(MAKEFLAGS))
-ifeq (,$(findstring =,$(MAKEOPTS)))
-ifneq (,$(findstring n,$(MAKEOPTS)))
-RDIST_FLAGS = -v
-endif
-endif
-RDIST_FLAGS += -lstdout=all:file=./rdist.log=all \
-  -d HOSTS_IOC="($(RDIST_HOSTS_IOC))" -d FILES_IOC="($(RDIST_FILES_IOC))" \
-  -d HOSTS_OPI="($(RDIST_HOSTS_OPI))" -d FILES_OPI="($(RDIST_FILES_OPI))" \
-  -d HOSTS_DOC="($(RDIST_HOSTS_DOC))" -d FILES_DOC="($(RDIST_FILES_DOC))"
-#IOC
-RDIST_HOSTS_IOC = vwhost
-RDIST_DIR_IOC = /opt/IOC
-#OPI
-RDIST_HOSTS_OPI = vwhost
-RDIST_DIR_OPI = /opt/OPI
-#DOC
-RDIST_HOSTS_DOC = help
-RDIST_DIR_DOC = /opt/apache/help/htdocs
+include $(TOP)/config/CONFIG_RDIST
 
 include $(TOP)/config/CONFIG
 
