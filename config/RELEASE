@@ -21,6 +21,4 @@
 
 
 SUPPORT=/opt/epics/R3.13.9/support
-MCAN=$(SUPPORT)/mcan/1-3-2
 EPICS_BASE=$(SUPPORT)/base/3-13-9
-
