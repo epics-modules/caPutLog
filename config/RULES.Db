@@ -3,9 +3,9 @@
 #	Rules for making things related to databases
 #
 MAKEBPT		= $(EPICS_BASE_HOST_BIN)/makeBpt$(EXE)
-MSI		= $(DBTOOLS_BIN)/msi
+MSI		= $(UTIL_BIN)/msi
 DBEXPAND	= $(EPICS_BASE_HOST_BIN)/dbExpand$(EXE)
-DBST		= dbst
+DBST		= $(UTIL_BIN)/dbst
 MAKEDBDEPENDS	= $(PERL) $(TOP)/config/makeDbDepends.pl
 REPLACEVAR	= $(PERL) $(TOP)/config/replaceVAR.pl
 ifndef WIN32
