@@ -20,5 +20,5 @@
 # Add your declarations here
 
 SUPPORT=/opt/epics/R3.13.8/support
-TEMPLATE_TOP=/opt/epics/R3.13.8/support/templates/1-5/makeBaseApp/top
+TEMPLATE_TOP=/opt/epics/R3.13.8/support/templates/1-6/makeBaseApp/top
 EPICS_BASE=$(SUPPORT)/base/3-13-8
