@@ -1,0 +1,11 @@
+#CONFIG
+# Add any changes to make rules here
+#CROSS_COMPILER_TARGET_ARCHS = mv167
+
+# make inc target before build_install
+MAKE_INC_TARGET_FIRST=YES
+
+# disable built-in rules
+MAKEFLAGS += -r
+
+-include $(TOP)/VERSION

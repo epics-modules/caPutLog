@@ -1,0 +1,56 @@
+#RULES.Vx
+
+# Search for objects and libraries in all <top>/bin/<t_a> dirs
+#vpath %.o . $(SUPPORT_BIN)
+#vpath % . $(SUPPORT_BIN)
+#doesn't work because rules in base use $(LIBOBJS), not $^
+
+# Enable simple file names (without ../ prefix) for SRCS.c and SRCS.cc
+vpath %.c . ..
+vpath %.cc . ..
+
+NO_PATH_LDOBJS = $(filter-out /,$(LDOBJS))
+PATH_LDOBJS = $(filter /,$(LDOBJS))
+LIBOBJS += $(PATH_LDOBJS) $(foreach file,$(NO_PATH_LDOBJS),$(shell find $(SUPPORT_BIN) -name $(file)))
+
+include $(EPICS_BASE)/config/RULES.Vx
+inc:: $(INSTALL_INCREC)
+
+# Warning: The following dependency rules are tricky!
+#
+# We cannot give a rule directly for depends_% because
+# even if included with '-' make tries to
+# remake it as long as it has a rule. This would be done
+# during inc target also (in fact we could remove the
+# dependency of buildInstall completely), but then
+# we have a problem, because generating the dependencies
+# may require installed header files.
+# Therefore, we use the intermediate target depends_%.stamp.
+# We don't want to use a .PHONY target, else dependencies
+# are made each time make is run. Therefore we have to
+# create a real file.
+# The rules below guarantee that depends_c is remade
+# only during buildInstall and whenever source files
+# have been changed.
+# All this applies of course analogously to the C++ part.
+
+DEPENDS_FLAG = -M
+
+ifneq (,$(strip $(SRCS.c)))
+buildInstall:: depends_c.stamp
+DEPENDS_FLAG = -M
+depends_c.stamp: $(SRCS.c)
+	@$(RM) depends_c
+	$(COMPILE.c) $(DEPENDS_FLAG) $^ > depends_c
+	touch $@
+-include depends_c
+endif
+
+ifneq (,$(strip $(SRCS.cc)))
+buildInstall:: depends_cc.stamp
+depends_cc.stamp: $(SRCS.cc)
+	@$(RM) depends_cc
+	$(COMPILE.cc) $(DEPENDS_FLAG) $^ > depends_cc
+	touch $@
+-include depends_cc
+endif

@@ -1,0 +1,1 @@
+chgrp -R epics .; chmod -R u=rwX,g=rX,o= .

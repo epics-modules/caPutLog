@@ -1,0 +1,7 @@
+#RULES_TOP
+include $(EPICS_BASE)/config/RULES_TOP
+include $(TOP)/config/RULES.Rdist
+
+uninstall::
+	@$(RMDIR) $(INSTALL_DB) $(INSTALL_ADL) $(INSTALL_FORM) \
+	  $(INSTALL_APPDEF) $(INSTALL_CFGDATA) $(INSTALL_TCLLIB)

@@ -1,0 +1,16 @@
+#RULES.Host
+
+include $(EPICS_BASE)/config/RULES.Host
+
+%.pdf: %.ps
+	ps2pdf $<
+
+%.ps: %.doc
+	/opt/frame/bin/fmprint $<
+	sleep 2
+
+%.doc: ../%.doc
+	ln -s $< .
+
+$(DIRECTORY_TARGETS):
+

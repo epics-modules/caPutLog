@@ -1,0 +1,92 @@
+# RULES.Rdist
+
+# Following variable definitions must be here (and not in CONFIG_APP) because
+# otherwise the $(shell ...) calls that generate RDIST_DEFAULT_FILES_*
+# are executed in every directory for every cmd line target...
+
+# Automatic search for files to distribute (if not given explicitly)
+ifndef RDIST_FILES_IOC
+RDIST_AUTO_FILES_IOC := \
+  $(shell find $(INSTALL_LOCATION)/ -maxdepth 1 -type d \
+    -name dbd -o -name db -o -name iocBoot 2>/dev/null) \
+  $(foreach arch, $(CROSS_COMPILER_TARGET_ARCHS), \
+    $(shell find $(INSTALL_LOCATION)/bin/ -maxdepth 1 -type d \
+    -name $(arch) 2>/dev/null))
+endif
+RDIST_FILES_IOC += $(strip $(RDIST_AUTO_FILES_IOC) rdistCmd.IOC)
+
+ifndef RDIST_FILES_OPI
+RDIST_AUTO_FILES_OPI := \
+  $(shell find $(INSTALL_LOCATION)/ -maxdepth 1 -type d \
+    -name dl -o -name form -o -name xresources -o -name etc -o -name tcl 2>/dev/null) \
+  $(shell find $(INSTALL_LOCATION)/bin/ -maxdepth 1 -type d -name $(HOST_ARCH) 2>/dev/null) \
+  $(shell find $(INSTALL_LOCATION)/lib/ -maxdepth 1 -type d -name $(HOST_ARCH) 2>/dev/null)
+endif
+RDIST_FILES_OPI += $(strip $(RDIST_AUTO_FILES_OPI) rdistCmd.OPI)
+
+ifndef RDIST_FILES_DOC
+RDIST_AUTO_FILES_DOC := $(shell find $(INSTALL_LOCATION)/doc/ -maxdepth 1 -mindepth 1 \
+  2>/dev/null)
+endif
+RDIST_FILES_DOC += $(strip $(RDIST_AUTO_FILES_DOC) rdistCmd.DOC)
+
+ifneq ($(RDIST_FILES_IOC),rdistCmd.IOC)
+RDIST_DOMAINS += IOC
+endif
+ifneq ($(RDIST_FILES_OPI),rdistCmd.OPI)
+RDIST_DOMAINS += OPI
+endif
+ifneq ($(RDIST_FILES_DOC),rdistCmd.DOC)
+RDIST_DOMAINS += DOC
+endif
+
+TOP_NAME := $(shell basename `pwd`)
+
+rdist: $(patsubst %,rdist.%,$(RDIST_DOMAINS))
+
+rdist.%: distfile
+	@echo Distributing $* files ...
+	@$(CP) $(TOP)/config/rdistCmd.$* $(TOP)
+	@$(CHMOD) a+x $(TOP)/rdistCmd.$*
+	@chgrp epics $(TOP)/rdistCmd.$*
+	@touch -r $(TOP)/config/rdistCmd.$* $(TOP)/rdistCmd.$*
+	+@$(RDIST) $(RDIST_FLAGS) $*
+	@$(RM) $(TOP)/rdistCmd.$*
+
+distfile:
+	@echo Generating Distfile
+	+@$(PERL) -s $(TOP)/config/makeDistfile.pl -top="$(TOP_NAME)" \
+	-IOC="$(RDIST_DIR_IOC)" -OPI="$(RDIST_DIR_OPI)" -DOC="$(RDIST_DIR_DOC)" \
+	-ver=$(VERSION) -domains="IOC OPI DOC"
+
+ifneq ($(strip $(VERSION)),)
+version: $(patsubst %,version.%,$(RDIST_DOMAINS))
+
+version.%:
+	@$(foreach host, $(RDIST_HOSTS_$*),ssh -x $(host) "cd $(RDIST_DIR_$*); umask 0; \
+		if [[ -e Releases/$(TOP_NAME)/$(VERSION) ]] && rm -f $(TOP_NAME); then \
+			echo Activating version $(VERSION) for domain $* on $(host); \
+			ln -s Releases/$(TOP_NAME)/$(VERSION) $(TOP_NAME); \
+		else \
+			echo Cannot change version to $(VERSION); false; \
+		fi";)
+endif
+
+listversions: $(patsubst %,listversions.%,$(RDIST_DOMAINS))
+
+listversions.%:
+	@$(foreach host, $(RDIST_HOSTS_$*),\
+		ssh -x  $(host) "echo Existing versions for domain $* on $(host):; \
+		if [[ -e $(RDIST_DIR_$*)/Releases/$(TOP_NAME) ]] \
+		ls $(RDIST_DIR_$*)/Releases/$(TOP_NAME)";)
+
+currentversion: $(patsubst %,currentversion.%,$(RDIST_DOMAINS))
+
+currentversion.%:
+	@$(foreach host, $(RDIST_HOSTS_$*),\
+		ssh -x  $(host) "echo Current version for domain $* on $(host):; \
+		if [[ -h $(RDIST_DIR_$*)/$(TOP_NAME) ]] \
+		ls -l $(RDIST_DIR_$*)/$(TOP_NAME) | cut -d \> -f 2 | cut -d / -f 3";)
+
+.PHONY:: distfile rdist rdist.* version version.* listversions listversions.* \
+    currentversion currentversion.*
