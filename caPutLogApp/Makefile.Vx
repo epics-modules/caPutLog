@@ -14,6 +14,8 @@ SRCS.c += ../iocCAPutLogClient.c
 
 PROD = $(SRCS.c:../%.c=%.o)
 
+DBDINSTALL += caPutLog.LDOBJS
+
 # The next lines are for dbd expansion
 #DBDEXPAND = caPutLog.dbdInc
 #DBDNAME = caPutLogApp.dbd
