@@ -19,6 +19,6 @@
 #
 # Add your declarations here
 
-TEMPLATE_TOP=/home/controls/epics/R3.13/support/templates/1-5/makeBaseApp/top
-SUPPORT=/home/controls/epics/R3.13/support
-EPICS_BASE=/home/controls/epics/R3.13/support/base/3-13-5
+SUPPORT=/opt/epics/R3.13.8/support
+TEMPLATE_TOP=/opt/epics/R3.13.8/support/templates/1-5/makeBaseApp/top
+EPICS_BASE=$(SUPPORT)/base/3-13-8
