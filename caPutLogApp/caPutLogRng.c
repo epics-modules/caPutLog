@@ -34,10 +34,10 @@
  *	12/12/02	kor	Added caPutLogVersion() routine.
  */
 
-/* $Author: birke $ */ 
-/* $Date: 2003/02/26 14:40:09 $ */ 
-/* $Id: caPutLogRng.c,v 1.1 2003/02/26 14:40:09 birke Exp $ */  
-/* $Revision: 1.1 $ */ 
+/* $Author: luchini $ */ 
+/* $Date: 2004/04/02 14:43:26 $ */ 
+/* $Id: caPutLogRng.c,v 1.2 2004/04/02 14:43:26 luchini Exp $ */  
+/* $Revision: 1.2 $ */ 
 
 #include <vxWorks.h>
 #include <stdlib.h>
@@ -52,6 +52,7 @@
 #include <taskLib.h>
 #include <sysSymTbl.h>
 #include <errnoLib.h>
+#include <usrLib.h>             /* for printErrno() prototype */
 
 #include "errlog.h"
 #include "dbDefs.h"
@@ -76,7 +77,7 @@ SEM_ID caPLRngSem = NULL; 	/* Semaphore ID for Ring Buffer
 
 char *strcat_cnt(char *s1, char *s2, int max);
 
-static char cvsid[] = "$Id: caPutLogRng.c,v 1.1 2003/02/26 14:40:09 birke Exp $";
+static char cvsid[] = "$Id: caPutLogRng.c,v 1.2 2004/04/02 14:43:26 luchini Exp $";
 
 static asTrapWriteId listenerId = NULL;		/* Trap Write Listener Id */
 static void *pvt = 0;				/* For freeList requests */
