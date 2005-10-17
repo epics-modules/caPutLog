@@ -1,2 +1,0 @@
-SUPPORT=/opt/epics/R3.13.9/support
-UTIL=$(SUPPORT)/util/1-3
