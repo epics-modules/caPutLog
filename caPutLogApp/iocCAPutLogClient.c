@@ -1,4 +1,3 @@
-/* $Id: iocCAPutLogClient.c,v 1.1 2003/02/26 14:40:09 birke Exp $ */
 /*
  *
  *      Author:         Jeffrey O. Hill 
@@ -32,7 +31,7 @@
  * .00 joh 080791  	Created
  * .01 joh 081591	Added epics env config
  * .02 joh 011995	Allow stdio also	
- * $Log: iocCAPutLogClient.c,v $
+ *
  * Revision 1.1  2003/02/26 14:40:09  birke
  * Initial revision
  *

@@ -34,11 +34,6 @@
  *	12/12/02	kor	Added caPutLogVersion() routine.
  */
 
-/* $Author: luchini $ */ 
-/* $Date: 2004/04/02 14:43:26 $ */ 
-/* $Id: caPutLogRng.c,v 1.2 2004/04/02 14:43:26 luchini Exp $ */  
-/* $Revision: 1.2 $ */ 
-
 #include <vxWorks.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -76,8 +71,6 @@ SEM_ID caPLRngSem = NULL; 	/* Semaphore ID for Ring Buffer
 #define DEBUG 0
 
 char *strcat_cnt(char *s1, char *s2, int max);
-
-static char cvsid[] = "$Id: caPutLogRng.c,v 1.2 2004/04/02 14:43:26 luchini Exp $";
 
 static asTrapWriteId listenerId = NULL;		/* Trap Write Listener Id */
 static void *pvt = 0;				/* For freeList requests */

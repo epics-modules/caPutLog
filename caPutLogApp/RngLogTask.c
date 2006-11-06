@@ -71,8 +71,6 @@ extern void CAPutLogClientShutdown(void);	/* To shutdown CA log
 						Client when CA Put Logging 
 						is disabled */
 
-static char cvsid[] = "$Id: RngLogTask.c,v 1.1 2003/02/26 14:40:09 birke Exp $";
-
 static long (*iocCAPutLogPrintf)() = NULL;	/* Call to log message */
 
 typedef struct val_typ {
