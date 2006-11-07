@@ -1,0 +1,7 @@
+<h4>logClient</h4>
+<p>The module has been split into a generic part (routines logClient*), and a specific part (iocLog*). The latter ones now reside in a separate module named iocLog, but are still exported from logClient for backward compatibility.
+
+Routines logClientInit() and logClientSendMessage() are now deprecated (retained for backwards compatibility only) because they are not completely generic. Instead, the new routines logClientCreate() resp. logClientSend() should be used.
+
+Chapter 19.15, "logClient", of the Application Developer's Guide has been fleshed out to document how to use logClient as a general purpose IOC logging library.
+</p>
