@@ -1,2 +1,0 @@
-# caPutLog driver
-LDOBJS += caPutLogRng.o RngLogTask.o iocCAPutLogClient.o
