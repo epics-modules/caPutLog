@@ -49,7 +49,6 @@ void epicsShareAPI caPutLogShow (int level)
     if (level > 2) level = 2;
 #if 0
     caPutLogAsShow(level);
-    caPutLogTaskShow(level);
 #endif
     caPutLogClientShow(level);
 }

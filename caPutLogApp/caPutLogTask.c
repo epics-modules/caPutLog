@@ -148,11 +148,6 @@ void caPutLogTaskStop(void)
     shut_down = TRUE;
 }
 
-void caPutLogTaskShow(int level)
-{
-    printf("caputLogTask: %s\n", cvsid);
-}
-
 void caPutLogTaskSend(LOGDATA *plogData)
 {
     if (!caPutLogQ) {

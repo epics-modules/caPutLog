@@ -40,7 +40,6 @@ typedef struct {
 epicsShareFunc int epicsShareAPI caPutLogTaskStart(int config);
 epicsShareFunc void epicsShareAPI caPutLogTaskStop(void);
 epicsShareFunc void epicsShareAPI caPutLogTaskSend(LOGDATA *plogData);
-epicsShareFunc void epicsShareAPI caPutLogTaskShow(int level);
 
 #ifdef __cplusplus
 }
