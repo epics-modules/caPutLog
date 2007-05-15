@@ -169,8 +169,10 @@ static void caPutLogTask(void *arg)
     /* Receive 1st message */
     epicsMessageQueueReceive(caPutLogQ, &pcurrent, MSG_SIZE);
 
+#if 0
     printf("caPutLog: received a message\n");
     val_dump(pcurrent);
+#endif
 
     /* Store the initial old_value */
     val_assign(pold, &pcurrent->old_value, pcurrent->type);
@@ -198,8 +200,10 @@ static void caPutLogTask(void *arg)
         }
         else if (pnext->pfield == pcurrent->pfield) {
 
+#if 0
             printf("caPutLog: received a message, same pv\n");
             val_dump(pnext);
+#endif
             /* current and next are same pv */
 
             caPutLogDataFree(pcurrent);
@@ -223,8 +227,10 @@ static void caPutLogTask(void *arg)
         }
         else {
 
+#if 0
             printf("caPutLog: received a message, different pv\n");
             val_dump(pnext);
+#endif
             /* current and next are different pvs */
 
             if (!sent) {
