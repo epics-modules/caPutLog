@@ -266,7 +266,6 @@ static void do_log(char *msg, size_t len, int truncated)
     strcpy(msg+len, "\n");
 
     /* send msg to log client */
-    errlogSevPrintf(errlogInfo, "caPutLog: sending to log client\n");
     caPutLogClientSend(msg);
 
     /* log to PV if enabled */

@@ -148,7 +148,6 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
             plogData->new_value.time.secPastEpoch = curTime.secPastEpoch;
             plogData->new_value.time.nsec = curTime.nsec;
         }
-        errlogSevPrintf(errlogInfo, "caPutLog: sending\n");
         caPutLogTaskSend(plogData);
     }
 }
