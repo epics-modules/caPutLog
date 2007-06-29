@@ -1,0 +1,72 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Benjamin Franksen">
+   <meta name="Description" content="Information about the EPICS caPutLog module.">
+   <meta name="KeyWords" content="EPICS, CA, Logging">
+   <title>EPICS CaPutLog Module</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+<img SRC="epics.gif" width=101 ALT="EPICS" HSPACE=5 height=101 align=RIGHT>
+
+<h1>EPICS CaPutLog Module</h1>
+
+<dl>
+
+<dt>Module Owner:</dt>
+
+<dd><a href="mailto:franksen@mail.bessy.de">Benjamin Franksen</a></dd>
+
+</dl>
+
+<h2>What's it?</h2>
+
+<p>CaPutLog is an EPICS support module that provides logging for Channel Access put operations. The current version works with EPICS 3.14.8.2 and later and is almost a complete re-write of the original (3.13 compatible) version that was written by V. Korobov (DESY). It is based on the generic iocLogClient that is part of the EPICS libCom. Starting a log server requires exactly the same steps as for the regular iocLogServer, except that you probably want to use a different port. On the IOC side there are three routines to be called from the iocShell. See Section Installation, below.</p>
+
+<h2>Get it</h2>
+
+<p>You can download it directly from the links in the table below, or get it via <a href=http://www.darcs.net/>darcs</a>:</p>
+
+<pre>
+  darcs get http://www-csr.bessy.de/control/SoftDist/caPutLog
+</pre>
+
+<table BORDER>
+
+<tr ALIGN=CENTER>
+<td><b>Module Version</b></td>
+<td><b>EPICS Release</b></td>
+<td><b>Filename</b></td>
+<td><b>Documentation</b></td>
+<td><b>Release Notes</b></td>
+</tr>
+
+<tr>
+<td><center>3.0</center></td>
+<td><center>3.14.8.2</center></td>
+<td><a href="../caPutLog-3.0.tar.gz">caPutLog-3.0.tar.gz</a></td>
+<td><center>n/a</center></td>
+<td><center>n/a</center></td>
+</tr>
+
+</table>
+
+<h2>Installation and Configuration</h2>
+
+Change the definition of <tt>EPICS_BASE</tt> in <tt>configure/RELEASE</tt> according to the location of epics base on the host, then (gnu-)<tt>make</tt>. Add the install directory to your IOC application's <tt>configure/RELEASE</tt>, and in the Makefile add <tt>caPutLog.dbd</tt> to your dbd includes and <tt>caPutLog</tt> to the libraries to link. In your IOC startup file add the command
+
+<pre>
+  caPutLogInit address [port]
+</pre>
+
+where <tt>address</tt> (mandatory argument) is the IP address or host name of the log server and <tt>port</tt> is optional (the default is 7011).
+
+For the server you can use the same executable as for the regular IOC log server. You might want to start another instance with a dfferent port, though. However, you can also use the same log server instance (so that caput log messages and regular IOC log messages go into the same log file).
+
+<hr WIDTH="100%">
+
+<address><a href="mailto:franksen@mail.bessy.de">website maintainer</a></address>
+
+</body>
+</html>
