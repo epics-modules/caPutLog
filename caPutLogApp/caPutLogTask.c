@@ -502,9 +502,12 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
 {
     switch (type) {
     case DBR_CHAR:
-        return epicsSnprintf(pbuf, buflen, "%c", (int)pval->v_uchar);
+       /* CHAR and UCHAR are typically used as SHORTSHORT,
+	* so avoid mounting NULL-bytes into the string
+	*/
+        return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uchar);
     case DBR_UCHAR:
-        return epicsSnprintf(pbuf, buflen, "%c", (int)pval->v_uchar);
+        return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uchar);
     case DBR_SHORT:
         return epicsSnprintf(pbuf, buflen, "%hd", pval->v_short);
     case DBR_USHORT:
