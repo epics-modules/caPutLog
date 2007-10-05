@@ -37,9 +37,6 @@
 #define LOCAL static
 #endif
 
-ENV_PARAM EPICS_CA_PUT_LOG_PORT;
-ENV_PARAM EPICS_CA_PUT_LOG_INET;
-
 /*
  *  caPutLogShow ()
  */

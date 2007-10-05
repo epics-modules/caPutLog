@@ -36,10 +36,7 @@
 #define LOCAL static
 #endif
 
-LOCAL READONLY ENV_PARAM EPICS_CA_PUT_LOG_PORT = {};
-LOCAL READONLY ENV_PARAM EPICS_CA_PUT_LOG_INET;
-
-LOCAL READONLY ENV_PARAM EPICS_CA_PUT_LOG_ADDR = {"EPICS_CA_PUT_LOG_ADDR", "7011"};
+LOCAL READONLY ENV_PARAM EPICS_CA_PUT_LOG_ADDR = {"EPICS_CA_PUT_LOG_ADDR", ""};
 
 LOCAL logClientId caPutLogClient;
 
@@ -70,12 +67,17 @@ int epicsShareAPI caPutLogClientInit (const char *addr_str)
 {
     int status;
     struct sockaddr_in saddr;
+    long default_port = 7011;
 
     if (caPutLogClient!=NULL) {
         return caPutLogSuccess;
     }
 
-    status = aToIPAddr (addr_str, 7011, &saddr);
+    if (!addr_str || !addr_str[0]) {
+        addr_str = envGetConfigParamPtr(&EPICS_CA_PUT_LOG_ADDR);
+    }
+
+    status = aToIPAddr (addr_str, default_port, &saddr);
     if (status<0) {
         fprintf (stderr, "caPutLog: bad address or host name\n");
         return caPutLogError;
