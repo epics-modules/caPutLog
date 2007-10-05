@@ -83,7 +83,7 @@ int epicsShareAPI caPutLogClientInit (const char *addr_str)
         return caPutLogError;
     }
 
-    caPutLogClient = logClientCreate (saddr.sin_addr, saddr.sin_port);
+    caPutLogClient = logClientCreate (saddr.sin_addr, ntohs(saddr.sin_port));
 
     if (!caPutLogClient) {
         return caPutLogError;
