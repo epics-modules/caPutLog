@@ -113,7 +113,11 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 
         dbNameOfPV(paddr, plogData->pv_name, PVNAME_STRINGSZ);
 
-        plogData->type = paddr->field_type;
+        if (VALID_DB_REQ(paddr->field_type)) {
+            plogData->type = paddr->field_type;
+        } else {
+            plogData->type = DBR_STRING;
+        }
         /* included for efficient pv-equality test: */
         plogData->pfield = paddr->pfield;
 
