@@ -70,9 +70,9 @@ Change the definition of <tt>EPICS_BASE</tt> in <tt>configure/RELEASE</tt> accor
   caPutLogInit address [port]
 </pre>
 
-where <tt>address</tt> (mandatory argument) is the IP address or host name of the log server and <tt>port</tt> is optional (the default is 7011).
+<p>where <tt>address</tt> (mandatory argument) is the IP address or host name of the log server and <tt>port</tt> is optional (the default is 7011). Alternatively the environment variable <tt>EPICS_CA_PUT_LOG_ADDR</tt> gets used if the first parameter to caPutLogInit is <tt>NULL</tt> or the empty string. The syntax for <tt>EPICS_CA_PUT_LOG_ADDR</tt> is the standard <tt>host[:port]</tt> notation.</p>
 
-For the server you can use the same executable as for the regular IOC log server. You might want to start another instance with a dfferent port, though. However, you can also use the same log server instance (so that caput log messages and regular IOC log messages go into the same log file).
+<p>For the server you can use the same executable as for the regular IOC log server. You might want to start another instance with a dfferent port, though. However, you can also use the same log server instance (so that caput log messages and regular IOC log messages go into the same log file).</p>
 
 <hr WIDTH="100%">
 
