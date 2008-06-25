@@ -26,7 +26,7 @@
 
 <h2>Get it</h2>
 
-<p>You can download it directly from the links in the table below, or get it via <a href=http://www.darcs.net/>darcs</a>:</p>
+<p>You can download a release from the links in the table below, or get the latest development version via <a href=http://www.darcs.net/>darcs</a>:</p>
 
 <pre>
   darcs get http://www-csr.bessy.de/control/SoftDist/caPutLog/repo/caPutLog
@@ -59,13 +59,35 @@
 
 <h2>Installation and Configuration</h2>
 
-Change the definition of <tt>EPICS_BASE</tt> in <tt>configure/RELEASE</tt> according to the location of epics base on the host, then (gnu-)<tt>make</tt>. Add the install directory to your IOC application's <tt>configure/RELEASE</tt>, and in the Makefile add <tt>caPutLog.dbd</tt> to your dbd includes and <tt>caPutLog</tt> to the libraries to link. In your IOC startup file add the command
+<p>Change the definition of <tt>EPICS_BASE</tt> in <tt>configure/RELEASE</tt> according to the location of epics base on the host, then (gnu-)<tt>make</tt>. Add the install directory to your IOC application's <tt>configure/RELEASE</tt>, and in the Makefile add <tt>caPutLog.dbd</tt> to your dbd includes and <tt>caPutLog</tt> to the libraries to link.</p>
+
+In your IOC startup file add the command
 
 <pre>
-  caPutLogInit address [port]
+  caPutLogInit "host[:port]" [config]
 </pre>
 
-<p>where <tt>address</tt> (mandatory argument) is the IP address or host name of the log server and <tt>port</tt> is optional (the default is 7011). Alternatively the environment variable <tt>EPICS_CA_PUT_LOG_ADDR</tt> gets used if the first parameter to caPutLogInit is <tt>NULL</tt> or the empty string. The syntax for <tt>EPICS_CA_PUT_LOG_ADDR</tt> is the standard <tt>host[:port]</tt> notation.</p>
+<p>where <tt>host</tt> (mandatory argument) is the IP address or host name of the log server and <tt>port</tt> is optional (the default is 7011). The environment variable <tt>EPICS_CA_PUT_LOG_ADDR</tt> is used if the first parameter to caPutLogInit is <tt>NULL</tt> or the empty string.</p>
+
+The second (optional, default=0) argument should be one of
+
+<pre>
+  #define caPutLogNone        -1  /* no logging (disable) */
+  #define caPutLogOnChange    0   /* log only on value change */
+  #define caPutLogAll         1   /* log all puts */
+</pre>
+
+Other shell commands are:
+
+<dl>
+  <dt>caPutLogReconf config</dt>
+  <dd>Change configuration on-line. The argument is the same as in <tt>caPutLogInit</tt>.</dd>
+</dl>
+
+<dl>
+  <dt>caPutLogShow level</dt>
+  <dd>Show Here, level is the usual interest level (0, 1, or 2).</dd>
+</dl>
 
 <p>For the server you can use the same executable as for the regular IOC log server. You might want to start another instance with a dfferent port, though. However, you can also use the same log server instance (so that caput log messages and regular IOC log messages go into the same log file).</p>
 
