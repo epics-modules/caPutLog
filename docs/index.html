@@ -67,7 +67,7 @@ In your IOC startup file add the command
   caPutLogInit "host[:port]" [config]
 </pre>
 
-<p>where <tt>host</tt> (mandatory argument) is the IP address or host name of the log server and <tt>port</tt> is optional (the default is 7011). The environment variable <tt>EPICS_CA_PUT_LOG_ADDR</tt> is used if the first parameter to caPutLogInit is <tt>NULL</tt> or the empty string.</p>
+<p>where <tt>host</tt> (mandatory argument) is the IP address or host name of the log server and <tt>port</tt> is optional (the default is 7011). The environment variable <tt>EPICS_CA_PUT_LOG_ADDR</tt> is used if the first parameter to <tt>caPutLogInit</tt> is <tt>NULL</tt> or the empty string.</p>
 
 The second (optional, default=0) argument should be one of
 
@@ -77,15 +77,26 @@ The second (optional, default=0) argument should be one of
   #define caPutLogAll         1   /* log all puts */
 </pre>
 
-Other shell commands are:
+Make sure access security is enabled on the IOC by providing a suitable configuration file and load it with a call to <tt>asSetFilename(&lt;filename&gt;)</tt> before iocInit. Your configuration file should contain a TRAPWRITE rule. The following snippet can be used to enable read/write access and write trapping for everyone (i.e. unrestricted access):
+
+<pre>
+  ASG(DEFAULT) {
+    RULE(1,READ)
+    RULE(1,WRITE,TRAPWRITE)
+  }
+</pre>
+
+<p><tt>caPutLogInit</tt> expects access security to be already running, so must be called <em>after</em> iocInit.</p>
+
+<p>Other shell commands are:</p>
 
 <dl>
-  <dt>caPutLogReconf config</dt>
+  <dt><tt>caPutLogReconf config</tt></dt>
   <dd>Change configuration on-line. The argument is the same as in <tt>caPutLogInit</tt>.</dd>
 </dl>
 
 <dl>
-  <dt>caPutLogShow level</dt>
+  <dt><tt>caPutLogShow level</tt></dt>
   <dd>Show Here, level is the usual interest level (0, 1, or 2).</dd>
 </dl>
 
