@@ -325,32 +325,32 @@ static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
     /* host, user, pv_name */
     len += epicsSnprintf(msg+len, space-len,
         " %s %s %s new=", pLogData->hostid, pLogData->userid, pLogData->pv_name);
-    if (len >= space) return do_log(msg, space-1, YES);
+    if (len >= space) { do_log(msg, space-1, YES); return; }
 
     /* new value */
     len += val_to_string(msg+len, space-len,
         &pLogData->new_value.value, pLogData->type);
-    if (len >= space) return do_log(msg, space-1, YES);
+    if (len >= space) { do_log(msg, space-1, YES); return; }
 
     len += epicsSnprintf(msg+len, space-len, " old=");
-    if (len >= space) return do_log(msg, space-1, YES);
+    if (len >= space) { do_log(msg, space-1, YES); return; }
 
     /* old value */
     len += val_to_string(msg+len, space-len, pold_value, pLogData->type);
-    if (len >= space) return do_log(msg, space-1, YES);
+    if (len >= space) { do_log(msg, space-1, YES); return; }
 
     if (burst && isDbrNumeric(pLogData->type)) {
         /* min value */
         len += epicsSnprintf(msg+len, space-len, " min=");
-        if (len >= space) return do_log(msg, space-1, YES);
+        if (len >= space) { do_log(msg, space-1, YES); return; }
         len += val_to_string(msg+len, space-len, pmin, pLogData->type);
-        if (len >= space) return do_log(msg, space-1, YES);
+        if (len >= space) { do_log(msg, space-1, YES); return; }
 
         /* max value */
         len += epicsSnprintf(msg+len, space-len, " max=");
-        if (len >= space) return do_log(msg, space-1, YES);
+        if (len >= space) { do_log(msg, space-1, YES); return; }
         len += val_to_string(msg+len, space-len, pmax, pLogData->type);
-        if (len >= space) return do_log(msg, space-1, YES);
+        if (len >= space) { do_log(msg, space-1, YES); return; }
     }
     do_log(msg, len, NO);
 }
