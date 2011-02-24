@@ -3,6 +3,7 @@ EPICS CaPutLog Module
 
 Author: `Ben Franksen`_ (`HZB`_)
 
+
 About
 -----
 
@@ -24,6 +25,8 @@ latest development version via `darcs`_::
 
    darcs get http://www-csr.bessy.de/control/SoftDist/caPutLog/repo/caPutLog
 
+You can also `browse`_ through the latest changes in the repo.
+
 +---------+---------------+---------------------------------+---------------+
 | Version | EPICS Release | Filename                        | Release Notes |
 +=========+===============+=================================+===============+
@@ -33,6 +36,7 @@ latest development version via `darcs`_::
 +---------+---------------+---------------------------------+---------------+
 |   3.2   |   3.14.11     | :download:`caPutLog-3.2.tar.gz` | :ref:`R3-2`   |
 +---------+---------------+---------------------------------+---------------+
+
 
 Setup
 -----
@@ -99,3 +103,4 @@ If you have any problems with this module, send me (`Ben Franksen`_) a mail.
 .. _caPutLog-3.2.tar.gz: caPutLog-3.2.tar.gz
 .. _HZB: http://www.helmholtz-berlin.de/
 .. _EPICS: http://www.aps.anl.goc/epics/
+.. _browse: http://www-csr.bessy.de/cgi-bin/darcsweb.cgi?r=caPutLog;a=summary
