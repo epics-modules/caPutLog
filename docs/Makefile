@@ -1,6 +1,14 @@
 TOP = ..
 include $(TOP)/configure/CONFIG
 
+ifeq "$(shell $(PERL) -e '`sphinx-build --version 2>&1`; print $$?')" "-1"
+
+$(info sphinx-build is not on your path, not building documentation)
+
+all build install:
+
+else
+
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build -q
@@ -148,3 +156,5 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+endif
