@@ -64,7 +64,7 @@ pdf: html
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
 
 tar:
-	for r in `darcs show tags | egrep '^([R\-][0-9]+)+$$')` ;\
+	for r in `darcs show tags | egrep '^([R\-][0-9]+)+$$'` ;\
 	do darcs dist -d docs/caPutLog`echo $$r|tr - .|tr R -` -t "^$$r$$" ;\
 	done
 
