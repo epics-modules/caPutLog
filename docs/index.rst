@@ -13,7 +13,7 @@ was written by V. Korobov (DESY). It is based on the generic iocLogClient
 that is part of the EPICS libCom. Starting a log server requires exactly the
 same steps as for the regular iocLogServer, except that you probably want to
 use a different port. On the IOC side there are three routines to be called
-from the iocShell. See Section Installation, below.
+from the iocShell. See section `Setup`_ below for details.
 
 
 Download
@@ -29,9 +29,9 @@ latest development version via `darcs`_::
 +=========+===============+=================================+===============+
 |   3.0   |   3.14.8.2    | :download:`caPutLog-3.0.tar.gz` | n/a           |
 +---------+---------------+---------------------------------+---------------+
-|   3.1   |   3.14.8.2    | :download:`caPutLog-3.1.tar.gz` | :ref:`R3-2`   |
+|   3.1   |   3.14.8.2    | :download:`caPutLog-3.1.tar.gz` | :ref:`R3-1`   |
 +---------+---------------+---------------------------------+---------------+
-|   3.2   |   3.14.11     | :download:`caPutLog-3.2.tar.gz` | :ref:`R3-1`   |
+|   3.2   |   3.14.11     | :download:`caPutLog-3.2.tar.gz` | :ref:`R3-2`   |
 +---------+---------------+---------------------------------+---------------+
 
 Setup
