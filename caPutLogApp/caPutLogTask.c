@@ -216,7 +216,7 @@ static void caPutLogTask(void *arg)
         else if (msg_size != MSG_SIZE) {
             errlogSevPrintf(errlogMinor, "caPutLog: discarding incomplete log data message\n");
         }
-        else if (pnext->pfield == pcurrent->pfield) {
+        else if ((pnext->pfield == pcurrent->pfield) && (config != caPutLogAllNoFilter)) {
 
 #if 0
             printf("caPutLog: received a message, same pv\n");
