@@ -81,8 +81,6 @@
 #endif
 
 #define MAX_BUF_SIZE    120     /* Length of log string */
-#define MAX_USR_ID      10      /* Length of user ID */
-#define MAX_HOST_ID     15      /* Length of host ID */
 
 static void caPutLogTask(void *arg);
 static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,

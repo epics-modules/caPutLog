@@ -73,6 +73,7 @@ int epicsShareAPI caPutLogInit (const char *addr_str, int config)
         return caPutLogSuccess;
         errlogSevPrintf(errlogInfo, "caPutLog: disabled\n");
     }
+
     status = caPutLogClientInit(addr_str);
     if (status) {
         return caPutLogError;
