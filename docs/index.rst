@@ -134,6 +134,22 @@ well as the minimum and maximum value are logged. This filtering can be
 disabled by specifying the ``caPutLogAllNoFilter`` configuration option.
 
 
+Acknowledgements
+----------------
+
+V\. Korobov (DESY)
+   created the original version for the EPICS base 3.13 series
+
+Jeff Hill (LANL)
+   wrote the iocLog code in base on which much of the implementation
+   was based on
+
+David Morris (TRIUMF)
+   suggested an option to disable filtering and wrote a patch to implemented it
+
+If I forgot to mention anyone, please drop me a note and I'll add them.
+
+
 Problems
 --------
 
