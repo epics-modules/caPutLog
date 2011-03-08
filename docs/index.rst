@@ -36,16 +36,26 @@ You can also `browse`_ through the latest changes in the repo.
 +---------+---------------+---------------------------------+---------------+
 |   3.2   |   3.14.11     | :download:`caPutLog-3.2.tar.gz` | :ref:`R3-2`   |
 +---------+---------------+---------------------------------+---------------+
+|   3.3   |   3.14.12     | :download:`caPutLog-3.3.tar.gz` | :ref:`R3-3`   |
++---------+---------------+---------------------------------+---------------+
+
+All versions above should work with base 3.14.8.2 and newer.
 
 
 Setup
 -----
+
+Build
++++++
 
 Change the definition of ``EPICS_BASE`` in ``configure/RELEASE`` according to
 the location of epics base on the host, then (gnu-)make. Add the install
 directory to your IOC application's ``configure/RELEASE``, and in the
 Makefile add ``caPutLog.dbd`` to your dbd includes and ``caPutLog`` to the
 libraries to link.
+
+Configure
++++++++++
 
 In your IOC startup file add the command::
 
@@ -61,6 +71,7 @@ The second (optional, default=0) argument should be one of ::
    #define caPutLogNone        -1  /* no logging (disable) */
    #define caPutLogOnChange    0   /* log only on value change */
    #define caPutLogAll         1   /* log all puts */
+   #define caPutLogAllNoFilter 2   /* log all puts no filtering on same PV*/
 
 Make sure access security is enabled on the IOC by providing a
 suitable configuration file and load it with a call to
@@ -75,19 +86,52 @@ unrestricted access)::
    }
 
 
-``caPutLogInit`` expects access security to be already running, so must be
-called *after* iocInit.
+Note that ``caPutLogInit`` expects access security to be already running, so
+must be called *after* iocInit.
 
 Other shell commands are:
 
-``caPutLogReconf config`` Change configuration on-line. The argument is the
-same as in ``caPutLogInit``. ``caPutLogShow level`` Show Here, level is the
-usual interest level (0, 1, or 2).
+``caPutLogReconf config``
+   Change configuration on-line. The argument is the same as in
+   ``caPutLogInit``.
+
+``caPutLogShow level``
+   Show information about a running caPutLog,
+   level is the usual interest level (0, 1, or 2).
+
+Server
+++++++
 
 For the server you can use the same executable as for the regular IOC log
-server. You might want to start another instance with a dfferent port,
+server. You might want to start another instance with a different port,
 though. However, you can also use the same log server instance (so that caput
 log messages and regular IOC log messages go into the same log file).
+
+
+Log Format
+----------
+
+The iocLogServer precedes each line with these data::
+
+   <host:port of log client> <date and time of log message reception>
+
+After this comes the actual log message, which has this format::
+
+   <date> <time> <host> <user> <change>
+
+where <date> and <time> refer to the time of the caput request, <host> and
+<user> identify the agent that requested the caput, and <change> is one of ::
+
+   new=<value> old=<value>
+
+or ::
+
+   new=<value> old=<value> min=<value> max=<value>
+
+The latter format means that several puts for the same PV have been received
+in rapid succession; in this case only the original and the final value as
+well as the minimum and maximum value are logged. This filtering can be
+disabled by specifying the ``caPutLogAllNoFilter`` configuration option.
 
 
 Problems

@@ -9,6 +9,8 @@ Changes since R3-2
 * create documentation with sphinx from rst files
 * minor changes to source code organisation
 * bump EPICS base default release to 3.14.12
+* add configuratuion switch to disable filtering
+  (thanks to a patch from David Morris)
 
 .. _R3-2:
 
