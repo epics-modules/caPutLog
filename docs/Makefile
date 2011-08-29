@@ -71,9 +71,11 @@ pdf: html
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
 
+SUPPRESS_OUTPUT := $(if $(findstring s,$(MAKEFLAGS)),>/dev/null,)
+
 tar:
 	for r in `darcs show tags | egrep '^([R\-][0-9]+)+$$'` ;\
-	do darcs dist -d docs/caPutLog`echo $$r|tr - .|tr R -` -t "^$$r$$" ;\
+	do darcs dist -d docs/caPutLog`echo $$r|tr - .|tr R -` -t "^$$r$$" $(SUPPRESS_OUTPUT);\
 	done
 
 singlehtml: tar
