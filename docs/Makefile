@@ -15,6 +15,8 @@ SPHINXBUILD   = sphinx-build -q
 PAPER         = a4
 BUILDDIR      = O.Common
 
+PROJECT       = caPutLog
+
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
@@ -57,7 +59,7 @@ help:
 
 realclean clean:
 	-rm -rf $(BUILDDIR)
-	-rm -f caPutLog*.tar.gz
+	-rm -f $(PROJECT)*.tar.gz
 
 html: tar
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
@@ -71,12 +73,24 @@ pdf: html
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
 
+tag2rel = $(subst R,,$(subst -,.,$1))
+rel2tag = R$(subst .,-,$1)
+
 SUPPRESS_OUTPUT := $(if $(findstring s,$(MAKEFLAGS)),>/dev/null,)
 
-tar:
-	for r in `darcs show tags | egrep '^([R\-][0-9]+)+$$'` ;\
-	do darcs dist -d docs/caPutLog`echo $$r|tr - .|tr R -` -t "^$$r$$" $(SUPPRESS_OUTPUT);\
-	done
+RELEASE_TAGS := $(shell darcs show tags | egrep '^([R\-][0-9]+)+$$')
+RELEASES := $(call tag2rel,$(RELEASE_TAGS))
+TARS := $(RELEASES:%=$(PROJECT)-%.tar.gz)
+
+tar: $(TARS)
+
+$(PROJECT)-%.tar.gz:
+	darcs dist -d docs/$(PROJECT)-$* -t $(call rel2tag,$*) $(SUPPRESS_OUTPUT)
+
+# tar:
+# 	for r in `darcs show tags | egrep '^([R\-][0-9]+)+$$'` ;\
+# 	do darcs dist -d docs/$(PROJECT)`echo $$r|tr - .|tr R -` -t "^$$r$$" $(SUPPRESS_OUTPUT);\
+# 	done
 
 singlehtml: tar
 	$(SPHINXBUILD) -b singlehtml $(ALLSPHINXOPTS) $(BUILDDIR)/html
@@ -102,17 +116,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/caPutLog.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/$(PROJECT).qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/caPutLog.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/$(PROJECT).qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/caPutLog"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/caPutLog"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/$(PROJECT)"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/$(PROJECT)"
 	@echo "# devhelp"
 
 epub:
