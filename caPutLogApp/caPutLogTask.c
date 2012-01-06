@@ -315,7 +315,7 @@ static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
     }
 
     /* first comes the time */
-    len = epicsTimeToStrftime(msg, space, "%d-%b-%y %T",
+    len = epicsTimeToStrftime(msg, space, "%d-%b-%y %H:%M:%S",
         &pLogData->new_value.time);
     /* this should always succeed (18 chars, last time i counted */
     assert(len);
