@@ -1,6 +1,33 @@
 Release Notes
 =============
 
+.. _R3-3-3:
+
+Changes since R3-3-2
+--------------------
+
+* replace %T by %H:%M:%S for strftime
+
+  Older VxWorks versions do not know the %T format specifier.
+
+.. _R3-3-2:
+
+Changes since R3-3-1
+--------------------
+
+* base -> 3-14-12-2-1
+
+* fixed tarball generation rules
+
+* suppress darcs dist output if -s flag is given to make
+
+.. _R3-3-1:
+
+Changes since R3-3
+--------------------
+
+* base release -> 3-14-12-1-1
+
 .. _R3-3:
 
 Changes since R3-2
