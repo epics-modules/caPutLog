@@ -36,6 +36,7 @@
  *				or for puts changing value.
  *	12/12/02	kor	Added RngLogTaskVersio request
  *	
+ *	03/24/14	jp	filled in val_dump()
  */
 
 #include <stdlib.h>
@@ -544,18 +545,26 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
 
 static void val_dump(LOGDATA *pdata)
 {
+  char oldbuf[512], newbuf[512], timebuf[64];
+
     printf("pdata = %p\n", pdata);
     if (!pdata) {
         printf("pdata = NULL\n");
     }
     else {
+        strcpy(oldbuf,"(conv fail)");
+        strcpy(newbuf,"(conv fail)");
+        strcpy(timebuf,"(strftime fail)");
+        val_to_string(oldbuf,sizeof(oldbuf),&pdata->old_value,pdata->type);
+        val_to_string(newbuf,sizeof(newbuf),&pdata->new_value.value,pdata->type);
+        epicsTimeToStrftime(timebuf,sizeof(timebuf),"%Y-%m-%dT%H:%M:%S",&pdata->new_value.time);
         printf("userid = %s\n", pdata->userid);
         printf("hostid = %s\n", pdata->hostid);
         printf("pv_name = %s\n", pdata->pv_name);
         printf("pfield = %p\n", pdata->pfield);
         printf("type = %d\n", pdata->type);
-        printf("old_value = --\n");
-        printf("new_value.time = --\n");
-        printf("new_value.value = --\n");
+        printf("old_value = %s\n", oldbuf);
+        printf("new_value.time = %s\n", timebuf);
+        printf("new_value.value = %s\n", newbuf);
     }
 }

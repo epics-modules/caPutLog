@@ -32,6 +32,9 @@
  *				time stamp. If less than current then set current
  *				time for the time stamp in registering structure.
  *	12/12/02	kor	Added caPutLogVersion() routine.
+ *	03/13/14	jp	added caPutLogDataCalloc() so non-IOC tasks
+ *				like pv gateway can use this module to log
+ *				puts.
  */
 #include <stdlib.h>
 #include <stddef.h>
@@ -100,7 +103,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
     long status;
 
     if (!afterPut) {                    /* before put */
-        plogData = freeListCalloc(logDataFreeList);
+        plogData = caPutLogDataCalloc();
         if (plogData == NULL) {
             errlogPrintf("caPutLog: memory allocation failed\n");
             pmessage->userPvt = NULL;
@@ -159,4 +162,9 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 void caPutLogDataFree(LOGDATA *plogData)
 {
     freeListFree(logDataFreeList, plogData);
+}
+
+LOGDATA* caPutLogDataCalloc(void)
+{
+  return freeListCalloc(logDataFreeList);
 }

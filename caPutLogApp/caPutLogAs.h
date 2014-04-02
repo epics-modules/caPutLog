@@ -12,6 +12,7 @@ extern "C" {
 epicsShareFunc int epicsShareAPI caPutLogAsInit();
 epicsShareFunc void epicsShareAPI caPutLogAsStop();
 epicsShareFunc void epicsShareAPI caPutLogDataFree(LOGDATA *pLogData);
+epicsShareFunc LOGDATA* epicsShareAPI caPutLogDataCalloc(void);
 
 #ifdef __cplusplus
 }

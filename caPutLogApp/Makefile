@@ -11,7 +11,13 @@ caPutLog_SRCS += caPutLogClient.c
 caPutLog_SRCS += caPutLog.c
 caPutLog_SRCS += caPutLogShellCommands.c
 
+# API for the IOC
 INC = caPutLog.h
+
+# formerly internal API exposed for non-IOC
+# servers (like the CA-Gateway)
+INC += caPutLogTask.h
+INC += caPutLogAs.h
 
 DBD += caPutLog.dbd
 

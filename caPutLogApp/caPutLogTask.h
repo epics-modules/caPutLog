@@ -6,7 +6,7 @@
 #include <epicsTime.h>
 
 #ifdef __cplusplus
-epicsShareFunc "C" {
+extern "C" {
 #endif
 
 #define MAX_USERID_SIZE 32
