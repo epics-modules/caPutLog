@@ -91,7 +91,9 @@ static void val_min(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
 static void val_max(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
 static int  val_equal(const VALUE *pa, const VALUE *pb, short type);
 static void val_assign(VALUE *dst, const VALUE *src, short type);
+#if 0
 static void val_dump(LOGDATA *pdata);
+#endif
 
 static int shut_down = FALSE;           /* Shut down flag */
 static DBADDR caPutLogPV;               /* Structure to keep address of Log PV */
@@ -543,6 +545,7 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
     }
 }
 
+#if 0
 static void val_dump(LOGDATA *pdata)
 {
   char oldbuf[512], newbuf[512], timebuf[64];
@@ -568,3 +571,4 @@ static void val_dump(LOGDATA *pdata)
         printf("new_value.value = %s\n", newbuf);
     }
 }
+#endif
