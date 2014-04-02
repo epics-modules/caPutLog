@@ -30,19 +30,21 @@ You can also `browse`_ through the latest changes in the repo.
 +---------+---------------+-----------------------------------+---------------+
 | Version | EPICS Release | Filename                          | Release Notes |
 +=========+===============+===================================+===============+
-|   3.0   |   3.14.8.2    | :download:`caPutLog-3.0.tar.gz`   | n/a           |
+|   3.4   |   3.14.12     | :download:`caPutLog-3.4.tar.gz`   | :ref:`R3-4`   |
 +---------+---------------+-----------------------------------+---------------+
-|   3.1   |   3.14.8.2    | :download:`caPutLog-3.1.tar.gz`   | :ref:`R3-1`   |
-+---------+---------------+-----------------------------------+---------------+
-|   3.2   |   3.14.11     | :download:`caPutLog-3.2.tar.gz`   | :ref:`R3-2`   |
-+---------+---------------+-----------------------------------+---------------+
-|   3.3   |   3.14.12     | :download:`caPutLog-3.3.tar.gz`   | :ref:`R3-3`   |
-+---------+---------------+-----------------------------------+---------------+
-|  3.3.1  |   3.14.12     | :download:`caPutLog-3.3.1.tar.gz` | :ref:`R3-3-1` |
+|  3.3.3  |   3.14.12     | :download:`caPutLog-3.3.3.tar.gz` | :ref:`R3-3-3` |
 +---------+---------------+-----------------------------------+---------------+
 |  3.3.2  |   3.14.12     | :download:`caPutLog-3.3.2.tar.gz` | :ref:`R3-3-2` |
 +---------+---------------+-----------------------------------+---------------+
-|  3.3.3  |   3.14.12     | :download:`caPutLog-3.3.3.tar.gz` | :ref:`R3-3-3` |
+|  3.3.1  |   3.14.12     | :download:`caPutLog-3.3.1.tar.gz` | :ref:`R3-3-1` |
++---------+---------------+-----------------------------------+---------------+
+|   3.3   |   3.14.12     | :download:`caPutLog-3.3.tar.gz`   | :ref:`R3-3`   |
++---------+---------------+-----------------------------------+---------------+
+|   3.2   |   3.14.11     | :download:`caPutLog-3.2.tar.gz`   | :ref:`R3-2`   |
++---------+---------------+-----------------------------------+---------------+
+|   3.1   |   3.14.8.2    | :download:`caPutLog-3.1.tar.gz`   | :ref:`R3-1`   |
++---------+---------------+-----------------------------------+---------------+
+|   3.0   |   3.14.8.2    | :download:`caPutLog-3.0.tar.gz`   | n/a           |
 +---------+---------------+-----------------------------------+---------------+
 
 All versions above should work with base 3.14.8.2 and newer.
@@ -152,6 +154,10 @@ Jeff Hill (LANL)
 
 David Morris (TRIUMF)
    suggested an option to disable filtering and wrote a patch to implemented it
+
+John Priller <priller@frib.msu.edu>
+   provided a patch to allow non-IOC servers to use (parts of) caPutLog
+   by exposing some previously internal APIs
 
 If I forgot to mention anyone, please drop me a note and I'll add them.
 
