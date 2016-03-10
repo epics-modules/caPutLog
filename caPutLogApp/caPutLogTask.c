@@ -49,7 +49,6 @@
 
 #include <dbFldTypes.h>
 #include <epicsTypes.h>
-#include <tsDefs.h>
 #include <dbDefs.h>
 #include <dbAccess.h>
 #include <errlog.h>
