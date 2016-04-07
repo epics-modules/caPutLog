@@ -469,46 +469,6 @@ static int val_equal(const VALUE *pa, const VALUE *pb, short type)
     }
 }
 
-#if 0
-#define cmp(a,b) (((a) < (b)) ? (-1) : (((a) > (b)) ? (+1) : 0))
-
-/*
- * val_cmp(): compare two VALUEs for equality(0), smaller(-1) or larger(+1)
- */
-static int val_cmp(const VALUE *pa, const VALUE *pb, short type)
-{
-    switch (type) {
-    case DBR_CHAR:
-        return cmp(pa->v_int8, pb->v_int8);
-    case DBR_UCHAR:
-        return cmp(pa->v_uint8, pb->v_uint8);
-    case DBR_SHORT:
-        return cmp(pa->v_int16, pb->v_int16);
-    case DBR_USHORT:
-    case DBR_ENUM:
-        return cmp(pa->v_uint16, pb->v_uint16);
-    case DBR_LONG:
-        return cmp(pa->v_int32, pb->v_int32);
-    case DBR_ULONG:
-        return cmp(pa->v_uint32, pb->v_uint32);
-#ifdef DBR_INT64
-    case DBR_INT64:
-        return cmp(pa->v_int64, pb->v_int64);
-    case DBR_UINT64:
-        return cmp(pa->v_uint64, pb->v_uint64);
-#endif
-    case DBR_FLOAT:
-        return cmp(pa->v_float, pb->v_float);
-    case DBR_DOUBLE:
-        return cmp(pa->v_double, pb->v_double);
-    case DBR_STRING:
-        return strcmp(pa->v_string, pb->v_string);
-    default:
-        return 0;
-    }
-}
-#endif
-
 /*
  * val_assign(): assign src VALUE to dst VALUE
  */
