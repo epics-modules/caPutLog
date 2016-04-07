@@ -359,24 +359,32 @@ static void val_min(VALUE *pres, const VALUE *pa, const VALUE *pb, short type)
 {
     switch (type) {
     case DBR_CHAR:
-        pres->v_char = min(pa->v_char, pb->v_char);
+        pres->v_int8 = min(pa->v_int8, pb->v_int8);
         return;
     case DBR_UCHAR:
-        pres->v_uchar = min(pa->v_uchar, pb->v_uchar);
+        pres->v_uint8 = min(pa->v_uint8, pb->v_uint8);
         return;
     case DBR_SHORT:
-        pres->v_short = min(pa->v_short, pb->v_short);
+        pres->v_int16 = min(pa->v_int16, pb->v_int16);
         return;
     case DBR_USHORT:
     case DBR_ENUM:
-        pres->v_ushort = min(pa->v_ushort, pb->v_ushort);
+        pres->v_uint16 = min(pa->v_uint16, pb->v_uint16);
         return;
     case DBR_LONG:
-        pres->v_long = min(pa->v_long, pb->v_long);
+        pres->v_int32 = min(pa->v_int32, pb->v_int32);
         return;
     case DBR_ULONG:
-        pres->v_ulong = min(pa->v_ulong, pb->v_ulong);
+        pres->v_uint32 = min(pa->v_uint32, pb->v_uint32);
         return;
+#ifdef DBR_INT64
+    case DBR_INT64:
+        pres->v_int64 = min(pa->v_int64, pb->v_int64);
+        return;
+    case DBR_UINT64:
+        pres->v_uint64 = min(pa->v_uint64, pb->v_uint64);
+        return;
+#endif
     case DBR_FLOAT:
         pres->v_float = min(pa->v_float, pb->v_float);
         return;
@@ -390,24 +398,32 @@ static void val_max(VALUE *pres, const VALUE *pa, const VALUE *pb, short type)
 {
     switch (type) {
     case DBR_CHAR:
-        pres->v_char = max(pa->v_char, pb->v_char);
+        pres->v_int8 = max(pa->v_int8, pb->v_int8);
         return;
     case DBR_UCHAR:
-        pres->v_uchar = max(pa->v_uchar, pb->v_uchar);
+        pres->v_uint8 = max(pa->v_uint8, pb->v_uint8);
         return;
     case DBR_SHORT:
-        pres->v_short = max(pa->v_short, pb->v_short);
+        pres->v_int16 = max(pa->v_int16, pb->v_int16);
         return;
     case DBR_USHORT:
     case DBR_ENUM:
-        pres->v_ushort = max(pa->v_ushort, pb->v_ushort);
+        pres->v_uint16 = max(pa->v_uint16, pb->v_uint16);
         return;
     case DBR_LONG:
-        pres->v_long = max(pa->v_long, pb->v_long);
+        pres->v_int32 = max(pa->v_int32, pb->v_int32);
         return;
     case DBR_ULONG:
-        pres->v_ulong = max(pa->v_ulong, pb->v_ulong);
+        pres->v_uint32 = max(pa->v_uint32, pb->v_uint32);
         return;
+#ifdef DBR_INT64
+    case DBR_INT64:
+        pres->v_int64 = max(pa->v_int64, pb->v_int64);
+        return;
+    case DBR_UINT64:
+        pres->v_uint64 = max(pa->v_uint64, pb->v_uint64);
+        return;
+#endif
     case DBR_FLOAT:
         pres->v_float = max(pa->v_float, pb->v_float);
         return;
@@ -424,24 +440,32 @@ static int val_equal(const VALUE *pa, const VALUE *pb, short type)
 {
     switch (type) {
     case DBR_CHAR:
-        return (pa->v_char == pb->v_char);
+        return (pa->v_int8 == pb->v_int8);
     case DBR_UCHAR:
-        return (pa->v_uchar == pb->v_uchar);
+        return (pa->v_uint8 == pb->v_uint8);
     case DBR_SHORT:
-        return (pa->v_short == pb->v_short);
+        return (pa->v_int16 == pb->v_int16);
     case DBR_USHORT:
     case DBR_ENUM:
-        return (pa->v_ushort == pb->v_ushort);
+        return (pa->v_uint16 == pb->v_uint16);
     case DBR_LONG:
-        return (pa->v_long == pb->v_long);
+        return (pa->v_int32 == pb->v_int32);
     case DBR_ULONG:
-        return (pa->v_ulong == pb->v_ulong);
+        return (pa->v_uint32 == pb->v_uint32);
+#ifdef DBR_INT64
+    case DBR_INT64:
+        return (pa->v_int64 == pb->v_int64);
+    case DBR_UINT64:
+        return (pa->v_uint64 == pb->v_uint64);
+#endif
     case DBR_FLOAT:
         return (pa->v_float == pb->v_float);
     case DBR_DOUBLE:
         return (pa->v_double == pb->v_double);
-    default:
+    case DBR_STRING:
         return (0==strcmp(pa->v_string, pb->v_string));
+    default:
+        return 0;
     }
 }
 
@@ -455,24 +479,32 @@ static int val_cmp(const VALUE *pa, const VALUE *pb, short type)
 {
     switch (type) {
     case DBR_CHAR:
-        return cmp(pa->v_char, pb->v_char);
+        return cmp(pa->v_int8, pb->v_int8);
     case DBR_UCHAR:
-        return cmp(pa->v_uchar, pb->v_uchar);
+        return cmp(pa->v_uint8, pb->v_uint8);
     case DBR_SHORT:
-        return cmp(pa->v_short, pb->v_short);
+        return cmp(pa->v_int16, pb->v_int16);
     case DBR_USHORT:
     case DBR_ENUM:
-        return cmp(pa->v_ushort, pb->v_ushort);
+        return cmp(pa->v_uint16, pb->v_uint16);
     case DBR_LONG:
-        return cmp(pa->v_long, pb->v_long);
+        return cmp(pa->v_int32, pb->v_int32);
     case DBR_ULONG:
-        return cmp(pa->v_ulong, pb->v_ulong);
+        return cmp(pa->v_uint32, pb->v_uint32);
+#ifdef DBR_INT64
+    case DBR_INT64:
+        return cmp(pa->v_int64, pb->v_int64);
+    case DBR_UINT64:
+        return cmp(pa->v_uint64, pb->v_uint64);
+#endif
     case DBR_FLOAT:
         return cmp(pa->v_float, pb->v_float);
     case DBR_DOUBLE:
         return cmp(pa->v_double, pb->v_double);
-    default:
+    case DBR_STRING:
         return strcmp(pa->v_string, pb->v_string);
+    default:
+        return 0;
     }
 }
 #endif
@@ -484,24 +516,32 @@ static void val_assign(VALUE *dst, const VALUE *src, short type)
 {
     switch (type) {
     case DBR_CHAR:
-        dst->v_char = src->v_char;
+        dst->v_int8 = src->v_int8;
         break;
     case DBR_UCHAR:
-        dst->v_uchar = src->v_uchar;
+        dst->v_uint8 = src->v_uint8;
         break;
     case DBR_SHORT:
-        dst->v_short = src->v_short;
+        dst->v_int16 = src->v_int16;
         break;
     case DBR_USHORT:
     case DBR_ENUM:
-        dst->v_ushort = src->v_ushort;
+        dst->v_uint16 = src->v_uint16;
         break;
     case DBR_LONG:
-        dst->v_long = src->v_long;
+        dst->v_int32 = src->v_int32;
         break;
     case DBR_ULONG:
-        dst->v_ulong = src->v_ulong;
+        dst->v_uint32 = src->v_uint32;
         break;
+#ifdef DBR_INT64
+    case DBR_INT64:
+        dst->v_int64 = src->v_int64;
+        break;
+    case DBR_UINT64:
+        dst->v_uint64 = src->v_uint64;
+        break;
+#endif
     case DBR_FLOAT:
         dst->v_float = src->v_float;
         break;
@@ -523,18 +563,18 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
        /* CHAR and UCHAR are typically used as SHORTSHORT,
 	* so avoid mounting NULL-bytes into the string
 	*/
-        return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uchar);
+        return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uint8);
     case DBR_UCHAR:
-        return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uchar);
+        return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uint8);
     case DBR_SHORT:
-        return epicsSnprintf(pbuf, buflen, "%hd", pval->v_short);
+        return epicsSnprintf(pbuf, buflen, "%hd", pval->v_int16);
     case DBR_USHORT:
     case DBR_ENUM:
-        return epicsSnprintf(pbuf, buflen, "%hu", pval->v_ushort);
+        return epicsSnprintf(pbuf, buflen, "%hu", pval->v_uint16);
     case DBR_LONG:
-        return epicsSnprintf(pbuf, buflen, "%ld", pval->v_long);
+        return epicsSnprintf(pbuf, buflen, "%ld", (long)pval->v_int32);
     case DBR_ULONG:
-        return epicsSnprintf(pbuf, buflen, "%lu", pval->v_ulong);
+        return epicsSnprintf(pbuf, buflen, "%lu", (unsigned long)pval->v_uint32);
     case DBR_FLOAT:
         return epicsSnprintf(pbuf, buflen, "%g", pval->v_float);
     case DBR_DOUBLE:
