@@ -30,6 +30,8 @@ You can also `browse`_ through the latest changes in the repo.
 +---------+---------------+-----------------------------------+---------------+
 | Version | EPICS Release | Filename                          | Release Notes |
 +=========+===============+===================================+===============+
+|   3.5   | 3.14.12..3.15 | :download:`caPutLog-3.5.tar.gz`   | :ref:`R3-5`   |
++---------+---------------+-----------------------------------+---------------+
 |   3.4   |   3.14.12     | :download:`caPutLog-3.4.tar.gz`   | :ref:`R3-4`   |
 +---------+---------------+-----------------------------------+---------------+
 |  3.3.3  |   3.14.12     | :download:`caPutLog-3.3.3.tar.gz` | :ref:`R3-3-3` |
@@ -46,8 +48,6 @@ You can also `browse`_ through the latest changes in the repo.
 +---------+---------------+-----------------------------------+---------------+
 |   3.0   |   3.14.8.2    | :download:`caPutLog-3.0.tar.gz`   | n/a           |
 +---------+---------------+-----------------------------------+---------------+
-
-All versions above should work with base 3.14.8.2 and newer.
 
 
 Setup
@@ -170,9 +170,6 @@ If you have any problems with this module, send me (`Ben Franksen`_) a mail.
 
 .. _Ben Franksen: mailto:benjamin.franksen@bessy.de
 .. _darcs: http://www.darcs.net/
-.. _caPutLog-3.0.tar.gz: caPutLog-3.0.tar.gz
-.. _caPutLog-3.1.tar.gz: caPutLog-3.1.tar.gz
-.. _caPutLog-3.2.tar.gz: caPutLog-3.2.tar.gz
 .. _HZB: http://www.helmholtz-berlin.de/
 .. _EPICS: http://www.aps.anl.goc/epics/
 .. _browse: http://www-csr.bessy.de/cgi-bin/darcsweb.cgi?r=caPutLog;a=summary
