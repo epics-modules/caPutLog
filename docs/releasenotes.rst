@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+.. _R3-5:
+
+Changes since R3-4
+------------------
+
+  * removed dead code for val_cmp
+
+  * prepare for DBR_INT64 & fixed default clauses
+
+  * support base-3.15
+
+  * remove missing (in base-3.15) and unneeded include tsDefs.h
+
 .. _R3-4:
 
 Changes since R3-3-3
