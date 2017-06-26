@@ -153,7 +153,7 @@ int caPutLogTaskStart(int config)
     shut_down = FALSE;
     threadId = epicsThreadCreate("caPutLog", epicsThreadPriorityLow,
         epicsThreadGetStackSize(epicsThreadStackSmall),
-        caPutLogTask, (void*)config);
+        caPutLogTask, (void*)(size_t)config);
     if (!threadId) {
         errlogSevPrintf(errlogFatal,"caPutLog: thread creation failed\n");
         return caPutLogError;
@@ -179,7 +179,7 @@ void caPutLogTaskSend(LOGDATA *plogData)
 static void caPutLogTask(void *arg)
 {
     int sent = FALSE, burst = FALSE;
-    int config = (int)arg;
+    int config = (size_t)arg;
     LOGDATA *pcurrent, *pnext;
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
