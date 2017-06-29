@@ -173,6 +173,7 @@ in rapid succession; in this case only the original and the final value as
 well as the minimum and maximum value are logged. This filtering can be
 disabled by specifying the ``caPutLogAllNoFilter`` (``2``) configuration option.
 
+From release 4 on, string values are quoted and special characters are escaped.
 
 Json Log Format
 +++++++++++++++

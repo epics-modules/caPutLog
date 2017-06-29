@@ -7,6 +7,7 @@ Changes since R3-7
 -------------------------
 
   * add new JSON log format
+  * quote and escape strings in non-JSON logs
 
 
 .. _R3-5:

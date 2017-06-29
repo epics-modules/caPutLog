@@ -47,6 +47,7 @@
 #include <epicsMessageQueue.h>
 #include <epicsThread.h>
 
+#include <epicsString.h>
 #include <dbFldTypes.h>
 #include <epicsTypes.h>
 #include <dbDefs.h>
@@ -527,8 +528,8 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
     switch (type) {
     case DBR_CHAR:
        /* CHAR and UCHAR are typically used as SHORTSHORT,
-	* so avoid mounting NULL-bytes into the string
-	*/
+        * so avoid mounting NULL-bytes into the string
+        */
         return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uint8);
     case DBR_UCHAR:
         return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uint8);
@@ -552,7 +553,13 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
         return epicsSnprintf(pbuf, buflen, "%llu", pval->v_uint64);
 #endif
     default:
-        return epicsSnprintf(pbuf, buflen, "%s", pval->v_string);
+        if (buflen < 3) return 0;
+        pbuf[0] = '"';
+        epicsStrnEscapedFromRaw(pbuf+1, buflen-2, pval->v_string, strlen(pval->v_string));
+        buflen = strlen(pbuf);
+        pbuf[buflen++] = '"';
+        pbuf[buflen] = 0;
+        return buflen;
     }
 }
 
