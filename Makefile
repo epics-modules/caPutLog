@@ -2,10 +2,14 @@
 TOP = .
 include $(TOP)/configure/CONFIG
 
-DIRS := configure caPutLogApp docs
+DIRS := configure
+DIRS += caPutLogApp
+
+caPutLogApp_DEPEND_DIRS = configure
+
+# Allow 'make docs' but don't otherwise descend into it
+ifeq ($(MAKECMDGOALS),docs)
+  DIRS += docs
+endif
 
 include $(TOP)/configure/RULES_TOP
-
-upload:
-	darcs push wwwcsr@www-csr.bessy.de:www/control/SoftDist/caPutLog/repo/caPutLog
-	rsync -r html/* wwwcsr@www-csr.bessy.de:www/control/SoftDist/caPutLog
