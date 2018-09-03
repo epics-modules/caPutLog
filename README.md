@@ -1,1 +1,1 @@
-Documentation is [here](https://epics-modules.github.io/caPutLog/docs/index.rst).
+Documentation is [here](https://github.com/epics-modules/caPutLog/blob/master/docs/index.rst).
