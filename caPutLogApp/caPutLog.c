@@ -25,6 +25,7 @@
 #include <errlog.h>
 #include <envDefs.h>
 #include <logClient.h>
+#include <epicsExit.h>
 
 #define epicsExportSharedSymbols
 #include "caPutLogAs.h"
@@ -61,6 +62,11 @@ int caPutLogReconf (int config)
     return caPutLogSuccess;
 }
 
+static void caPutLogExitProc(void *arg)
+{
+    caPutLogAsStop();
+}
+
 /*
  *  caPutLogInit()
  */
@@ -87,6 +93,8 @@ int caPutLogInit (const char *addr_str, int config)
     if (status) {
         return caPutLogError;
     }
+
+    epicsAtExit(caPutLogExitProc, NULL);
 
     errlogSevPrintf(errlogInfo, "caPutLog: successfully initialized\n");
     return caPutLogSuccess;
