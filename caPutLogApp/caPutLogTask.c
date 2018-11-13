@@ -3,7 +3,7 @@
  *	Created:  25.05.98
  *
  *	Contains codes for a task which waits for messages
- *	on specified Ring Buffer, sorts messages to avoid 
+ *	on specified Ring Buffer, sorts messages to avoid
  *	multiple logging for subsequent messages with the same
  *	record name, forms logging message and logs it via iocCAPutLogPrintf.
  *
@@ -35,7 +35,7 @@
  *				Optionally logging is done either for all puts
  *				or for puts changing value.
  *	12/12/02	kor	Added RngLogTaskVersio request
- *	
+ *
  *	03/24/14	jp	filled in val_dump()
  */
 
@@ -95,7 +95,7 @@ static void val_dump(LOGDATA *pdata);
 
 static int shut_down = FALSE;           /* Shut down flag */
 static DBADDR caPutLogPV;               /* Structure to keep address of Log PV */
-static DBADDR *pcaPutLogPV;             /* Pointer to PV address structure, 
+static DBADDR *pcaPutLogPV;             /* Pointer to PV address structure,
                                            also used as a flag whether this
                                            PV is defined or not */
 static epicsMessageQueueId caPutLogQ;   /* Mailbox for caPutLogTask */
