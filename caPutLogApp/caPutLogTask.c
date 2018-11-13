@@ -79,7 +79,7 @@
 #define min(x, y)       (((x) < (y)) ? (x) : (y))
 #endif
 
-#define MAX_BUF_SIZE    120     /* Length of log string */
+#define MAX_BUF_SIZE    256     /* Length of log string */
 
 static void caPutLogTask(void *arg);
 static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
