@@ -21,6 +21,9 @@ INC += caPutLogAs.h
 
 DBD += caPutLog.dbd
 
+caPutLog_LIBS += $(EPICS_BASE_IOC_LIBS)
+caPutLog_SYS_LIBS_WIN32 += ws2_32
+
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE

@@ -27,9 +27,8 @@
 #include <errlog.h>
 #include <logClient.h>
 
-#include "caPutLog.h"
-
 #define epicsExportSharedSymbols
+#include "caPutLog.h"
 #include "caPutLogClient.h"
 
 #ifndef LOCAL
@@ -43,7 +42,7 @@ LOCAL logClientId caPutLogClient;
 /*
  *  caPutLogClientFlush ()
  */
-void epicsShareAPI epicsShareAPI caPutLogClientFlush ()
+void caPutLogClientFlush ()
 {
     if (caPutLogClient!=NULL) {
         logClientFlush (caPutLogClient);
@@ -53,7 +52,7 @@ void epicsShareAPI epicsShareAPI caPutLogClientFlush ()
 /*
  *  caPutLogClientShow ()
  */
-void epicsShareAPI caPutLogClientShow (unsigned level)
+void caPutLogClientShow (unsigned level)
 {
     if (caPutLogClient!=NULL) {
         logClientShow (caPutLogClient, level);
@@ -63,7 +62,7 @@ void epicsShareAPI caPutLogClientShow (unsigned level)
 /*
  *  caPutLogClientInit()
  */
-int epicsShareAPI caPutLogClientInit (const char *addr_str)
+int caPutLogClientInit (const char *addr_str)
 {
     int status;
     struct sockaddr_in saddr;
@@ -96,7 +95,7 @@ int epicsShareAPI caPutLogClientInit (const char *addr_str)
 /*
  * caPutLogClientSend ()
  */
-void epicsShareAPI caPutLogClientSend (const char *message)
+void caPutLogClientSend (const char *message)
 {
     if (caPutLogClient) {
         logClientSend (caPutLogClient, message);

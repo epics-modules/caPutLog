@@ -56,10 +56,9 @@
 #include "dbChannel.h"
 #endif
 
+#define epicsExportSharedSymbols
 #include "caPutLog.h"
 #include "caPutLogTask.h"
-
-#define epicsExportSharedSymbols
 #include "caPutLogAs.h"
 
 static asTrapWriteId listenerId = 0;

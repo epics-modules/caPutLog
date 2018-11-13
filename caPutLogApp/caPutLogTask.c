@@ -55,11 +55,10 @@
 #include <asLib.h>
 #include <epicsAssert.h>
 
+#define epicsExportSharedSymbols
 #include "caPutLog.h"
 #include "caPutLogAs.h"
 #include "caPutLogClient.h"
-
-#define epicsExportSharedSymbols
 #include "caPutLogTask.h"
 
 #ifdef NO

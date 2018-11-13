@@ -26,11 +26,10 @@
 #include <envDefs.h>
 #include <logClient.h>
 
+#define epicsExportSharedSymbols
 #include "caPutLogAs.h"
 #include "caPutLogTask.h"
 #include "caPutLogClient.h"
-
-#define epicsExportSharedSymbols
 #include "caPutLog.h"
 
 #ifndef LOCAL
@@ -40,7 +39,7 @@
 /*
  *  caPutLogShow ()
  */
-void epicsShareAPI caPutLogShow (int level)
+void caPutLogShow (int level)
 {
     if (level < 0) level = 0;
     if (level > 2) level = 2;
@@ -53,7 +52,7 @@ void epicsShareAPI caPutLogShow (int level)
 /*
  *  caPutLogReconf()
  */
-int epicsShareAPI caPutLogReconf (int config)
+int caPutLogReconf (int config)
 {
 #if 0
     caPutLogTaskReconf(config);
@@ -65,7 +64,7 @@ int epicsShareAPI caPutLogReconf (int config)
 /*
  *  caPutLogInit()
  */
-int epicsShareAPI caPutLogInit (const char *addr_str, int config)
+int caPutLogInit (const char *addr_str, int config)
 {
     int status;
 

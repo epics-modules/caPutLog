@@ -7,10 +7,10 @@
 extern "C" {
 #endif
 
-epicsShareFunc int epicsShareAPI caPutLogClientInit (const char *addr_str);
-epicsShareFunc void epicsShareAPI caPutLogClientShow (unsigned level);
-epicsShareFunc void epicsShareAPI caPutLogClientFlush ();
-epicsShareFunc void epicsShareAPI caPutLogClientSend (const char *message);
+epicsShareFunc int caPutLogClientInit (const char *addr_str);
+epicsShareFunc void caPutLogClientShow (unsigned level);
+epicsShareFunc void caPutLogClientFlush ();
+epicsShareFunc void caPutLogClientSend (const char *message);
 
 #ifdef __cplusplus
 }

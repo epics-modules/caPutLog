@@ -9,10 +9,10 @@
 extern "C" {
 #endif
 
-epicsShareFunc int epicsShareAPI caPutLogAsInit();
-epicsShareFunc void epicsShareAPI caPutLogAsStop();
-epicsShareFunc void epicsShareAPI caPutLogDataFree(LOGDATA *pLogData);
-epicsShareFunc LOGDATA* epicsShareAPI caPutLogDataCalloc(void);
+epicsShareFunc int caPutLogAsInit();
+epicsShareFunc void caPutLogAsStop();
+epicsShareFunc void caPutLogDataFree(LOGDATA *pLogData);
+epicsShareFunc LOGDATA* caPutLogDataCalloc(void);
 
 #ifdef __cplusplus
 }
