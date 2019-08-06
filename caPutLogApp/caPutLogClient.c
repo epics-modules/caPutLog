@@ -26,6 +26,8 @@
 #include <envDefs.h>
 #include <errlog.h>
 #include <logClient.h>
+#include <epicsString.h>
+#include <epicsStdio.h>
 
 #define epicsExportSharedSymbols
 #include "caPutLog.h"
@@ -35,17 +37,26 @@
 #define LOCAL static
 #endif
 
+#ifdef _WIN32
+#define strtok_r strtok_s
+#endif
+
 LOCAL READONLY ENV_PARAM EPICS_CA_PUT_LOG_ADDR = {"EPICS_CA_PUT_LOG_ADDR", ""};
 
-LOCAL logClientId caPutLogClient;
+LOCAL struct clientlist {
+    logClientId caPutLogClient;
+    struct clientlist *next;
+    char addr[1];
+} *caPutLogClients = NULL;
 
 /*
  *  caPutLogClientFlush ()
  */
 void caPutLogClientFlush ()
 {
-    if (caPutLogClient!=NULL) {
-        logClientFlush (caPutLogClient);
+    struct clientlist* c;
+    for (c = caPutLogClients; c; c = c->next) {
+        logClientFlush (c->caPutLogClient);
     }
 }
 
@@ -54,8 +65,9 @@ void caPutLogClientFlush ()
  */
 void caPutLogClientShow (unsigned level)
 {
-    if (caPutLogClient!=NULL) {
-        logClientShow (caPutLogClient, level);
+    struct clientlist* c;
+    for (c = caPutLogClients; c; c = c->next) {
+        logClientShow (c->caPutLogClient, level);
     }
 }
 
@@ -66,13 +78,15 @@ int caPutLogClientInit (const char *addr_str)
 {
     int status;
     struct sockaddr_in saddr;
-    long default_port = 7011;
-
-    if (caPutLogClient!=NULL) {
-        return caPutLogSuccess;
-    }
+    unsigned short default_port = 7011;
+    struct clientlist** pclient;
+    char *clientaddr;
+    char *saveptr;
+    char *addr_str_copy1;
+    char *addr_str_copy2;
 
     if (!addr_str || !addr_str[0]) {
+        if (caPutLogClients) return caPutLogSuccess;
         addr_str = envGetConfigParamPtr(&EPICS_CA_PUT_LOG_ADDR);
     }
     if (addr_str == NULL) {
@@ -80,20 +94,46 @@ int caPutLogClientInit (const char *addr_str)
         return caPutLogError;
     }
 
-    status = aToIPAddr (addr_str, default_port, &saddr);
-    if (status<0) {
-        fprintf (stderr, "caPutLog: bad address or host name\n");
-        return caPutLogError;
-    }
+    addr_str_copy2 = addr_str_copy1 = epicsStrDup(addr_str);
 
-    caPutLogClient = logClientCreate (saddr.sin_addr, ntohs(saddr.sin_port));
+    while(1) {
+        clientaddr = strtok_r(addr_str_copy1, " \t\n\r", &saveptr);
+        if (!clientaddr) break;
+        addr_str_copy1 = NULL;
 
-    if (!caPutLogClient) {
-        return caPutLogError;
+        for (pclient = &caPutLogClients; *pclient; pclient = &(*pclient)->next) {
+            if (strcmp(clientaddr, (*pclient)->addr) == 0) {
+                fprintf (stderr, "caPutLog: address %s already configured\n", clientaddr);
+                break;
+            }
+        }
+        if (*pclient) continue;
+
+        status = aToIPAddr (clientaddr, default_port, &saddr);
+        if (status<0) {
+            fprintf (stderr, "caPutLog: bad address or host name %s\n", clientaddr);
+            continue;
+        }
+
+        *pclient = malloc(sizeof(struct clientlist)+strlen(clientaddr));
+        if (!*pclient) {
+            fprintf (stderr, "caPutLog: out of memory\n");
+            return caPutLogError;
+        }
+        strcpy((*pclient)->addr, clientaddr);
+
+        (*pclient)->caPutLogClient = logClientCreate (saddr.sin_addr, ntohs(saddr.sin_port));
+        if (!(*pclient)->caPutLogClient) {
+            fprintf (stderr, "caPutLog: cannot create logClient %s\n", clientaddr);
+            free(*pclient);
+            *pclient = NULL;
+            continue;
+        }
+
+        (*pclient)->next = NULL;
     }
-    else {
-        return caPutLogSuccess;
-    }
+    free(addr_str_copy2);
+    return caPutLogClients ? caPutLogSuccess : caPutLogError;
 }
 
 /*
@@ -101,7 +141,8 @@ int caPutLogClientInit (const char *addr_str)
  */
 void caPutLogClientSend (const char *message)
 {
-    if (caPutLogClient) {
-        logClientSend (caPutLogClient, message);
+    struct clientlist* c;
+    for (c = caPutLogClients; c; c = c->next) {
+        logClientSend (c->caPutLogClient, message);
     }
 }
