@@ -514,7 +514,7 @@ static void val_assign(VALUE *dst, const VALUE *src, short type)
 /*
  * caPutLogVALUEToString(): convert VALUE to string
  */
-static int caPutLogVALUEToString(char *pbuf, size_t buflen, const VALUE *pval, short type)
+int caPutLogVALUEToString(char *pbuf, size_t buflen, const VALUE *pval, short type)
 {
     switch (type) {
     case DBR_CHAR:
