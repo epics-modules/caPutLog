@@ -167,12 +167,12 @@ void caPutLogTaskStop(void)
 
 void caPutLogTaskSend(LOGDATA *plogData)
 {
-    if (!caPutLogQ) {
-        return;
-    }
-    if (epicsMessageQueueTrySend(caPutLogQ, &plogData, MSG_SIZE)) {
+    if (caPutLogQ) {
+        if (!epicsMessageQueueTrySend(caPutLogQ, &plogData, MSG_SIZE))
+            return;
         errlogSevPrintf(errlogMinor, "caPutLog: message queue overflow\n");
     }
+    caPutLogDataFree(plogData);
 }
 
 static void caPutLogTask(void *arg)
