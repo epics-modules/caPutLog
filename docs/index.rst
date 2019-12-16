@@ -174,6 +174,9 @@ well as the minimum and maximum value are logged. This filtering can be
 disabled by specifying the ``caPutLogAllNoFilter`` (``2``) configuration option.
 
 From release 4 on, string values are quoted and special characters are escaped.
+The default date/time format ``%d-%b-%y %H:%M:%S`` may be changed at compile time
+with the macro DEFAULT_TIME_FMT and/or modified at run time using the shell function
+``caPutLogSetTimeFmt "<date_time_format>"``.
 
 Json Log Format
 +++++++++++++++

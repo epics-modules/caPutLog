@@ -8,6 +8,7 @@ Changes since R3-7
 
   * add new JSON log format
   * quote and escape strings in non-JSON logs
+  * allow to change time format
 
 
 .. _R3-5:

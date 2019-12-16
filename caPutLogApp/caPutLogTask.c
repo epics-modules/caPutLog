@@ -82,6 +82,15 @@
 
 #define MAX_BUF_SIZE    256     /* Length of log string */
 
+#ifndef DEFAULT_TIME_FMT
+#define DEFAULT_TIME_FMT %d-%b-%y %H:%M:%S
+#endif
+#define STR2(x) #x
+#define STR(x) STR2(x)
+#define DEFAULT_TIME_FMT_STR STR(DEFAULT_TIME_FMT)
+
+static const char *timeFormat = DEFAULT_TIME_FMT_STR;
+
 static void caPutLogTask(void *arg);
 static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
     int burst, const VALUE *pmin, const VALUE *pmax, int config);
@@ -181,6 +190,12 @@ void caPutLogTaskSend(LOGDATA *plogData)
         }
     }
     caPutLogDataFree(plogData);
+}
+
+void caPutLogSetTimeFmt (const char *format)
+{
+    if (format)
+        timeFormat = format;
 }
 
 static void caPutLogTask(void *arg)
@@ -324,9 +339,9 @@ static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
     }
 
     /* first comes the time */
-    len = epicsTimeToStrftime(msg, space, "%d-%b-%y %H:%M:%S",
+    len = epicsTimeToStrftime(msg, space, timeFormat,
         &pLogData->new_value.time);
-    /* this should always succeed (18 chars, last time i counted */
+    /* this should always succeed */
     assert(len);
 
     /* host, user, pv_name */
