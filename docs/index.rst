@@ -125,10 +125,11 @@ The iocLogServer precedes each line with these data::
 
 After this comes the actual log message, which has this format::
 
-   <date> <time> <host> <user> <change>
+   <date> <time> <host> <user> <pv> <change>
 
 where <date> and <time> refer to the time of the caput request, <host> and
-<user> identify the agent that requested the caput, and <change> is one of ::
+<user> identify the agent that requested the caput, <pv> is the record or
+record.field name and <change> is one of ::
 
    new=<value> old=<value>
 
