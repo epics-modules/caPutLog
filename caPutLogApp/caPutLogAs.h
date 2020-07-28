@@ -9,10 +9,12 @@
 extern "C" {
 #endif
 
-epicsShareFunc int caPutLogAsInit();
+epicsShareFunc int caPutLogAsInit(void (*sendCallback)(LOGDATA *), void (*stopCallback)());
 epicsShareFunc void caPutLogAsStop();
 epicsShareFunc void caPutLogDataFree(LOGDATA *pLogData);
 epicsShareFunc LOGDATA* caPutLogDataCalloc(void);
+
+int caPutLogMaxArraySize(short type);
 
 #ifdef __cplusplus
 }

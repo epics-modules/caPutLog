@@ -68,9 +68,15 @@ static void *logDataFreeList = 0;
 #define FREE_LIST_SIZE 1000
 
 static void caPutLogAs(asTrapWriteMessage * pmessage, int afterPut);
+static void (*psendCallback)(LOGDATA *);
+static void (*pstopCallback)() = NULL;
 
-int caPutLogAsInit()
+
+int caPutLogAsInit(void (*sendCallback)(LOGDATA *), void (*stopCallback)())
 {
+    psendCallback = sendCallback;
+    pstopCallback = stopCallback;
+
     if (!asActive) {
         errlogSevPrintf(errlogFatal, "caPutLog: access security is disabled\n");
         return caPutLogError;
@@ -92,7 +98,9 @@ int caPutLogAsInit()
 
 void caPutLogAsStop()
 {
-    caPutLogTaskStop();
+    if (pstopCallback != NULL) {
+        pstopCallback();
+    }
 
     if (listenerId) {
         asTrapWriteUnregisterListener(listenerId);
@@ -113,6 +121,9 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
     LOGDATA *plogData;
     long options, num_elm;
     long status;
+    rset *prset;
+    long noElements = 0;
+    long offset = 0;
 
     if (!afterPut) {                    /* before put */
         plogData = caPutLogDataCalloc();
@@ -140,9 +151,17 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
         plogData->pfield = paddr->pfield;
 
         options = 0;
-        num_elm = 1;
+        num_elm = caPutLogMaxArraySize(plogData->type);
         status = dbGetField(
             paddr, plogData->type, &plogData->old_value, &options, &num_elm, 0);
+        plogData->old_log_size = num_elm;
+        if ((prset = dbGetRset(paddr)) &&
+                prset->get_array_info) {
+            prset->get_array_info(paddr, &noElements, &offset);
+            plogData->old_size = noElements;
+        } else {
+            plogData->old_size = num_elm;
+        }
 
         if (status) {
             errlogPrintf("caPutLog: dbGetField error=%ld\n", status);
@@ -156,9 +175,18 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
         plogData = (LOGDATA *) pmessage->userPvt;
 
         options = DBR_TIME;
-        num_elm = 1;
+        num_elm = caPutLogMaxArraySize(plogData->type);
         status = dbGetField(
             paddr, plogData->type, &plogData->new_value, &options, &num_elm, 0);
+        plogData->new_log_size = num_elm;
+        if ((prset = dbGetRset(paddr)) &&
+                prset->get_array_info) {
+            prset->get_array_info(paddr, &noElements, &offset);
+            plogData->new_size = noElements;
+        } else {
+            plogData->new_size = num_elm;
+        }
+
         if (status) {
             errlogPrintf("caPutLog: dbGetField error=%ld.\n", status);
             plogData->type = DBR_STRING;
@@ -170,8 +198,45 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
             plogData->new_value.time.secPastEpoch = curTime.secPastEpoch;
             plogData->new_value.time.nsec = curTime.nsec;
         }
-        caPutLogTaskSend(plogData);
+        psendCallback(plogData);
     }
+}
+
+int caPutLogMaxArraySize(short type)
+{
+
+#if !JSON_AND_ARRAYS_SUPPORTED
+    return 1;
+#else
+    switch (type) {
+        case DBR_CHAR:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt8);
+        case DBR_UCHAR:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt8);
+        case DBR_SHORT:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt16);
+        case DBR_USHORT:
+        case DBR_ENUM:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt16);
+        case DBR_LONG:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt32);
+        case DBR_ULONG:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt32);
+    #ifdef DBR_INT64
+        case DBR_INT64:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt64);
+        case DBR_UINT64:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt64);
+    #endif
+        case DBR_FLOAT:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsFloat32);
+        case DBR_DOUBLE:
+            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsFloat64);
+        case DBR_STRING:
+            return MAX_ARRAY_SIZE_BYTES/MAX_STRING_SIZE;
+
+    }
+#endif
 }
 
 void caPutLogDataFree(LOGDATA *plogData)
