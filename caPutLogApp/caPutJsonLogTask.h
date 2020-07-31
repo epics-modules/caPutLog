@@ -31,16 +31,19 @@
 #include "caPutLogTask.h"
 
 // Status return values
-#define caPutJsonLogSuccess     0
-#define caPutJsonLogError       -1
+enum caPutJsonLogStatus {
+    caPutJsonLogSuccess = 0,
+    caPutJsonLogError   = -1
+};
 
-// For parameter 'config' of caPutJsonLogInit and caPutJsonLogReconfigure
-#define caPutJsonLogNone        -1  /* no logging (disable) */
-#define caPutJsonLogOnChange    0   /* log only on value change */
-#define caPutJsonLogAll         1   /* log all puts */
-#define caPutJsonLogAllNoFilter 2   /* log all puts no filtering on same PV*/
+// Configuration options
+enum caPutJsonLogConfig {
+    caPutJsonLogNone        = -1, /* no logging (disable) */
+    caPutJsonLogOnChange    =  0, /* log only on value change */
+    caPutJsonLogAll         =  1, /* log all puts */
+    caPutJsonLogAllNoFilter =  2  /* log all puts no filtering on same PV*/
+};
 
-#define FREE_LIST_SIZE 1000
 
 #ifdef __cplusplus
 
@@ -57,16 +60,16 @@ public:
      */
     // Class methods
     static CaPutJsonLogTask* getInstance() noexcept;
-    int initialize(const char* address, int config);
+    caPutJsonLogStatus initialize(const char* address, caPutJsonLogConfig config);
     void addPutToQueue(LOGDATA * plogData);
     void caPutJsonLogTask(void *arg); //Must be public, called from C
 
-    int start();
-    int stop();
+    caPutJsonLogStatus start();
+    caPutJsonLogStatus stop();
 
     // Logger config methods
-    int reconfigure(int config);
-    int report(int level);
+    caPutJsonLogStatus reconfigure(caPutJsonLogConfig config);
+    caPutJsonLogStatus report(int level);
 
 private:
     /*
@@ -103,22 +106,22 @@ private:
     CaPutJsonLogTask(const CaPutJsonLogTask&&);
 
     // Logger logic
-    int buildJsonMsg(const VALUE *pold_value, const LOGDATA *pLogData,
-            int burst, const VALUE *pmin, const VALUE *pmax, int config);
+    caPutJsonLogStatus buildJsonMsg(const VALUE *pold_value, const LOGDATA *pLogData,
+                            bool burst, const VALUE *pmin, const VALUE *pmax);
 
     // Logging to a server
-    int configureServerLogging(const char* address);
+    caPutJsonLogStatus configureServerLogging(const char* address);
     void logToServer(std::string &msg);
 
     // Logging to a PV
-    int configurePvLogging();
+    caPutJsonLogStatus configurePvLogging();
     void logToPV(std::string &msg);
 
     // Logger helper methods
     void calculateMin(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
     void calculateMax(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
     bool compareValue(const VALUE *pa, const VALUE *pb, short type);
-    int  fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval, short type, int index);
+    int fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval, short type, int index);
 };
 
 

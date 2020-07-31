@@ -22,7 +22,7 @@
 extern "C"
 {
     /* Initalisation */
-    int caPutJsonLogInit(const char * address, int config){
+    int caPutJsonLogInit(const char * address, caPutJsonLogConfig config){
         CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
         if (logger != nullptr) return logger->initialize(address, config);
         else return -1;
@@ -37,12 +37,12 @@ extern "C"
     static const iocshFuncDef caPutjsonLogInitDef = {"caPutJsonLogInit", 2, caPutJsonLogInitArgs};
     static void caPutJsonLogInitCall(const iocshArgBuf *args)
     {
-        caPutJsonLogInit(args[0].sval, args[1].ival);
+        caPutJsonLogInit(args[0].sval, static_cast<caPutJsonLogConfig>(args[1].ival));
     }
 
 
     /* Reconfigure */
-    int caPutJsonLogReconf(int config){
+    int caPutJsonLogReconf(caPutJsonLogConfig config){
         CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
         if (logger != nullptr)  return logger->reconfigure(config);
         else return -1;
@@ -55,7 +55,7 @@ extern "C"
     static const iocshFuncDef caPutJsonLogReconfDef = {"caPutJsonLogReconf", 1, caPutJsonLogReconfArgs};
     static void caPutJsonLogReconfCall(const iocshArgBuf *args)
     {
-        caPutJsonLogReconf(args[0].ival);
+        caPutJsonLogReconf(static_cast<caPutJsonLogConfig>(args[0].ival));
     }
 
     /* Report */

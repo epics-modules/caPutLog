@@ -68,7 +68,7 @@ CaPutJsonLogTask::CaPutJsonLogTask()
 CaPutJsonLogTask::~CaPutJsonLogTask()
 { }
 
-int CaPutJsonLogTask::reconfigure(int config)
+caPutJsonLogStatus CaPutJsonLogTask::reconfigure(caPutJsonLogConfig config)
 {
     if ((config < caPutJsonLogNone)
         || (config > caPutJsonLogAllNoFilter)) {
@@ -80,7 +80,7 @@ int CaPutJsonLogTask::reconfigure(int config)
     return caPutJsonLogSuccess;
 }
 
-int CaPutJsonLogTask::report(int level)
+caPutJsonLogStatus CaPutJsonLogTask::report(int level)
 {
     if (this->caPutJsonLogClient != NULL) {
         logClientShow(this->caPutJsonLogClient, level);
@@ -92,9 +92,9 @@ int CaPutJsonLogTask::report(int level)
     }
 }
 
-int CaPutJsonLogTask::initialize(const char* address, int config)
+caPutJsonLogStatus CaPutJsonLogTask::initialize(const char* address, caPutJsonLogConfig config)
 {
-    int status;
+    caPutJsonLogStatus status;
 
     // Store passed configuration parameters
     this->address = epicsStrDup(address);
@@ -122,7 +122,7 @@ int CaPutJsonLogTask::initialize(const char* address, int config)
     }
 
     // Initialize caPutLogAs
-    status = caPutLogAsInit(caddPutToQueue, NULL);
+    status = static_cast<caPutJsonLogStatus>(caPutLogAsInit(caddPutToQueue, NULL));
     if (status != caPutJsonLogSuccess) {
         errlogSevPrintf(errlogMinor, "caPutJsonLog: failed to configure Access security\n");
         return caPutJsonLogError;
@@ -134,7 +134,7 @@ int CaPutJsonLogTask::initialize(const char* address, int config)
     return caPutJsonLogSuccess;
 }
 
-int CaPutJsonLogTask::start()
+caPutJsonLogStatus CaPutJsonLogTask::start()
 {
     // Check if Access security is enabled
     if (!asActive) {
@@ -157,7 +157,7 @@ int CaPutJsonLogTask::start()
     return caPutJsonLogSuccess;
 }
 
-int CaPutJsonLogTask::stop()
+caPutJsonLogStatus CaPutJsonLogTask::stop()
 {
     // Send signal to stop the logger worker thread
     this->taskStopper = true;
@@ -168,7 +168,7 @@ int CaPutJsonLogTask::stop()
     return caPutJsonLogSuccess;
 }
 
-int CaPutJsonLogTask::configureServerLogging(const char* address)
+caPutJsonLogStatus CaPutJsonLogTask::configureServerLogging(const char* address)
 {
     int status;
     struct sockaddr_in saddr;
@@ -189,7 +189,7 @@ int CaPutJsonLogTask::configureServerLogging(const char* address)
     return caPutJsonLogSuccess;
 }
 
-int CaPutJsonLogTask::configurePvLogging()
+caPutJsonLogStatus CaPutJsonLogTask::configurePvLogging()
 {
     char *caPutJsonLogPVEnv;
 
@@ -245,7 +245,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
         if (msgSize == -1) {
             // If we have have unsent message and timeout occurred, send the cached change
             if (!sent) {
-                buildJsonMsg(pold, pcurrent, burst, pmin, pmax, this->config);
+                buildJsonMsg(pold, pcurrent, burst, pmin, pmax);
                 std::memcpy(pold, &pcurrent->new_value.value, sizeof(VALUE));
                 sent = true;
                 burst = false;
@@ -288,7 +288,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
         // We log every change
         else {
             if (!sent) {
-                buildJsonMsg(pold, pcurrent, burst, pmin, pmax, this->config);
+                buildJsonMsg(pold, pcurrent, burst, pmin, pmax);
                 sent = true;
             }
 
@@ -328,8 +328,8 @@ void CaPutJsonLogTask::addPutToQueue(LOGDATA * plogData)
     } \
     }
 
-int CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const LOGDATA *pLogData,
-                                int burst, const VALUE *pmin, const VALUE *pmax, int config)
+caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const LOGDATA *pLogData,
+                                bool burst, const VALUE *pmin, const VALUE *pmax)
 {
     // Intermediate message build buffer
     // The longest message for the buffer can occur in the lso/lsi records which
@@ -529,6 +529,7 @@ int CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const LOGDATA *pLogD
     /* Log */
     this->logToServer(json);
     this->logToPV(json);
+    return caPutJsonLogSuccess;
 }
 
 void CaPutJsonLogTask::logToServer(std::string &msg)
