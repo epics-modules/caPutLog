@@ -69,7 +69,7 @@ enum caPutJsonLogConfig {
  * For the instructions how to use the utility please refer to the user manual.
  *
  */
-class CaPutJsonLogTask {
+class epicsShareClass CaPutJsonLogTask {
 public:
 
     // Default port to be used if not specified by the user
@@ -262,9 +262,9 @@ extern "C" {
 /*
  * C interface functions (Called from base)
  */
-void caddPutToQueue(LOGDATA * plogData);
-void caPutJsonLogWorker(void *arg);
-void caPutJsonLogExit(void *arg);
+epicsShareFunc void caddPutToQueue(LOGDATA * plogData);
+epicsShareFunc void caPutJsonLogWorker(void *arg);
+epicsShareFunc void caPutJsonLogExit(void *arg);
 
 #ifdef __cplusplus
 }

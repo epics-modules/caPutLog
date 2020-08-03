@@ -15,8 +15,8 @@ epicsShareFunc void caPutLogAsStop();
 epicsShareFunc void caPutLogDataFree(LOGDATA *pLogData);
 epicsShareFunc LOGDATA* caPutLogDataCalloc(void);
 
-int caPutLogMaxArraySize(short type);
-long caPutLogActualArraySize(dbAddr * paddr);
+epicsShareFunc int caPutLogMaxArraySize(short type);
+epicsShareFunc long caPutLogActualArraySize(dbAddr * paddr);
 
 #ifdef __cplusplus
 }
