@@ -2,6 +2,7 @@
 #define INCcaPutLogAsh 1
 
 #include <shareLib.h>
+#include <dbAddr.h>
 
 #include "caPutLogTask.h"
 
@@ -15,6 +16,7 @@ epicsShareFunc void caPutLogDataFree(LOGDATA *pLogData);
 epicsShareFunc LOGDATA* caPutLogDataCalloc(void);
 
 int caPutLogMaxArraySize(short type);
+long caPutLogActualArraySize(dbAddr * paddr);
 
 #ifdef __cplusplus
 }

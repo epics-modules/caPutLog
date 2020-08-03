@@ -121,9 +121,6 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
     LOGDATA *plogData;
     long options, num_elm;
     long status;
-    rset *prset;
-    long noElements = 0;
-    long offset = 0;
 
     if (!afterPut) {                    /* before put */
         plogData = caPutLogDataCalloc();
@@ -155,13 +152,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
         status = dbGetField(
             paddr, plogData->type, &plogData->old_value, &options, &num_elm, 0);
         plogData->old_log_size = num_elm;
-        if ((prset = dbGetRset(paddr)) &&
-                prset->get_array_info) {
-            prset->get_array_info(paddr, &noElements, &offset);
-            plogData->old_size = noElements;
-        } else {
-            plogData->old_size = num_elm;
-        }
+        plogData->old_size = caPutLogActualArraySize(paddr);
 
         if (status) {
             errlogPrintf("caPutLog: dbGetField error=%ld\n", status);
@@ -179,13 +170,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
         status = dbGetField(
             paddr, plogData->type, &plogData->new_value, &options, &num_elm, 0);
         plogData->new_log_size = num_elm;
-        if ((prset = dbGetRset(paddr)) &&
-                prset->get_array_info) {
-            prset->get_array_info(paddr, &noElements, &offset);
-            plogData->new_size = noElements;
-        } else {
-            plogData->new_size = num_elm;
-        }
+        plogData->new_size = caPutLogActualArraySize(paddr);
 
         if (status) {
             errlogPrintf("caPutLog: dbGetField error=%ld.\n", status);
@@ -237,6 +222,21 @@ int caPutLogMaxArraySize(short type)
 
     }
 #endif
+}
+
+long caPutLogActualArraySize(dbAddr * paddr)
+{
+    rset *prset = dbGetRset(paddr);
+    long nActual;
+    long offset;
+
+    if (paddr->no_elements > 1 &&
+             prset->get_array_info) {
+        prset->get_array_info(paddr, &nActual, &offset);
+    } else {
+        nActual = paddr->no_elements;
+    }
+    return nActual;
 }
 
 void caPutLogDataFree(LOGDATA *plogData)
