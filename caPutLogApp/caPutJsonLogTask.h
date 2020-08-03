@@ -16,7 +16,6 @@
 
 // Standard library imports
 #include <string>
-#include <atomic>
 
 // Epics base imports
 #include <envDefs.h>
@@ -147,14 +146,14 @@ private:
 
     // Logger configuration
     const char * address;
-    std::atomic_int config;
+    int config; // To modify or read this value only epicsAtomic methods should be used
 
     // Interthread communication
     epicsMessageQueue caPutJsonLogQ;
 
     // Working thread
     epicsThreadId threadId;
-    std::atomic_bool taskStopper;
+    int taskStopper; // To modify or read this value only epicsAtomic methods should be used
 
     //Logging to a server
     logClientId caPutJsonLogClient;

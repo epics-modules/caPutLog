@@ -24,10 +24,10 @@
 #include <logClient.h>
 #include <freeList.h>
 #include <epicsThread.h>
+#include <epicsAtomic.h>
 #include <dbAccessDefs.h>
 #include <dbChannel.h>
 #include <epicsExit.h>
-// #include <epicsAssert.h>
 #include <yajl_gen.h>
 
 // This module imports
@@ -73,9 +73,9 @@ caPutJsonLogStatus CaPutJsonLogTask::reconfigure(caPutJsonLogConfig config)
     if ((config < caPutJsonLogNone)
         || (config > caPutJsonLogAllNoFilter)) {
         errlogSevPrintf(errlogMinor, "caPutJsonLog: invalid config request, setting to default 'caPutJsonLogAll'\n");
-        this->config = caPutJsonLogAll;
+        epics::atomic::set(this->config, caPutJsonLogAll);
     } else {
-        this->config = config;
+        epics::atomic::set(this->config, config);
     }
     return caPutJsonLogSuccess;
 }
@@ -143,7 +143,7 @@ caPutJsonLogStatus CaPutJsonLogTask::start()
     }
 
     // Create logging thread
-    this->taskStopper = false;
+    epics::atomic::set(this->taskStopper,  false);
     const char * threadName = "caPutJsonLog";
     threadId = epicsThreadCreate(threadName,
                                     epicsThreadPriorityLow,
@@ -160,7 +160,7 @@ caPutJsonLogStatus CaPutJsonLogTask::start()
 caPutJsonLogStatus CaPutJsonLogTask::stop()
 {
     // Send signal to stop the logger worker thread
-    this->taskStopper = true;
+    epics::atomic::set(this->taskStopper,  true);
 
     // Deregister Access Security trap
     caPutLogAsStop();
@@ -234,7 +234,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
     }
 
     // Main loop of the logger, which accepts the caput changes and process them
-    while (!this->taskStopper)
+    while (!(bool)epics::atomic::get(this->taskStopper))
     {
         int msgSize;
 
@@ -259,7 +259,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
 
         // Previous and new PV are the same and we are applying the burst filter
         else if ((pnext->pfield == pcurrent->pfield)
-                    && (this->config != caPutJsonLogAllNoFilter)
+                    && (epics::atomic::get(this->config) != caPutJsonLogAllNoFilter)
                     && (pcurrent->type != DBR_CHAR)) {
 
             // Free "old" value
@@ -306,7 +306,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
             burst = false;
         }
     }
-    this->taskStopper = false;
+    epics::atomic::set(this->taskStopper,  false);
     errlogSevPrintf(errlogInfo, "caPutJsonLog: log task exiting\n");
 }
 
