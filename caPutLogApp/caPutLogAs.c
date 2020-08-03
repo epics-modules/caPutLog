@@ -153,6 +153,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
             paddr, plogData->type, &plogData->old_value, &options, &num_elm, 0);
         plogData->old_log_size = num_elm;
         plogData->old_size = caPutLogActualArraySize(paddr);
+        plogData->is_array = paddr->no_elements > 1 ? TRUE : FALSE;
 
         if (status) {
             errlogPrintf("caPutLog: dbGetField error=%ld\n", status);
@@ -171,6 +172,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
             paddr, plogData->type, &plogData->new_value, &options, &num_elm, 0);
         plogData->new_log_size = num_elm;
         plogData->new_size = caPutLogActualArraySize(paddr);
+        plogData->is_array = plogData->is_array || paddr->no_elements > 1 ? TRUE : FALSE;
 
         if (status) {
             errlogPrintf("caPutLog: dbGetField error=%ld.\n", status);
@@ -189,37 +191,29 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 
 int caPutLogMaxArraySize(short type)
 {
-
 #if !JSON_AND_ARRAYS_SUPPORTED
     return 1;
 #else
-    switch (type) {
-        case DBR_CHAR:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt8);
-        case DBR_UCHAR:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt8);
-        case DBR_SHORT:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt16);
-        case DBR_USHORT:
-        case DBR_ENUM:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt16);
-        case DBR_LONG:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt32);
-        case DBR_ULONG:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt32);
-    #ifdef DBR_INT64
-        case DBR_INT64:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt64);
-        case DBR_UINT64:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt64);
-    #endif
-        case DBR_FLOAT:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsFloat32);
-        case DBR_DOUBLE:
-            return MAX_ARRAY_SIZE_BYTES/sizeof(epicsFloat64);
-        case DBR_STRING:
-            return MAX_ARRAY_SIZE_BYTES/MAX_STRING_SIZE;
+    static int const arraySizeLookUpTable [] = {
+        MAX_ARRAY_SIZE_BYTES/MAX_STRING_SIZE,       /* DBR_STRING */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt8),     /* DBR_CHAR */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt8),    /* DBR_UCHAR */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt16),    /* DBR_SHORT */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt16),   /* DBR_USHORT */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt32),    /* DBR_LONG */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt32),   /* DBR_ULONG */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt64),    /* DBR_INT64 */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt64),   /* DBR_UINT64 */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsFloat32),  /* DBR_FLOAT */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsFloat64),  /* DBR_DOUBLE */
+        MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt16)    /* DBR_ENUM */
+    };
 
+    if (type >= DBR_STRING || type <= DBR_ENUM){
+        return arraySizeLookUpTable[type];
+    } else {
+        errlogSevPrintf(errlogMajor, "caPutLogAs: Array size for type %d can not be determind\n", type);
+        return 1;
     }
 #endif
 }

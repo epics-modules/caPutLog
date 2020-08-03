@@ -60,6 +60,7 @@ typedef struct {
         TS_STAMP    time;
         VALUE       value;
     }               new_value;
+    int is_array;
     int old_size;
     int old_log_size;
     int new_size;

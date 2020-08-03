@@ -228,7 +228,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
     this->caPutJsonLogQ.receive(&pcurrent, sizeof(LOGDATA *));
     std::memcpy(pold, &pcurrent->old_value, sizeof(VALUE));
 
-    if (pcurrent->new_size > 0 && pcurrent->type != DBF_CHAR) {
+    if (pcurrent->new_size > 0 && pcurrent->type != DBR_CHAR) {
         std::memcpy(pmax, &pcurrent->new_value.value, sizeof(VALUE));
         std::memcpy(pmin, &pcurrent->new_value.value, sizeof(VALUE));
     }
@@ -399,28 +399,23 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
                             strlen(reinterpret_cast<const char *>(str_newVal))));
 
     // Open Json array if we have array value
-    if (pLogData->new_size > 1 && pLogData->type != DBR_CHAR) {
+    if (pLogData->is_array) {
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_array_open(handle));
     }
-    // We have empty array
-    if (pLogData->new_size == 0) {
-        const unsigned char empty_value[] = "<empty>";
-        CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, empty_value,
-                            strlen(reinterpret_cast<const char *>(empty_value))));
-    }
+
     // We have string
-    else if (pLogData->type == DBF_CHAR){
+    if (pLogData->type == DBR_CHAR){
         fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
-                &pLogData->new_value.value, DBF_CHAR, 0);
+                &pLogData->new_value.value, DBR_CHAR, 0);
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
                             strlen(reinterpret_cast<const char *>(interBuffer))));
     }
-    // Arrays and scalars (all except DBF_CHAR)
+    // Arrays and scalars (all except DBR_CHAR)
     else {
         for (int i = 0; i < pLogData->new_log_size; i++) {
             fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
             &pLogData->new_value.value, pLogData->type, i);
-            if (pLogData->type == DBF_STRING) {
+            if (pLogData->type == DBR_STRING) {
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
                             strlen(reinterpret_cast<char *>(interBuffer))));
             } else {
@@ -430,12 +425,9 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
             }
         }
     }
-    // Close Json array if we have array value
-    if (pLogData->new_size > 1 && pLogData->type != DBR_CHAR) {
+    //  Close Json array and add new size, but only if we have array
+    if (pLogData->is_array) {
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_array_close(handle));
-    }
-    // Add new size, but only if we have array
-    if (pLogData->new_size > 1) {
         const unsigned char str_newSize[] = "new-size";
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_newSize,
                             strlen(reinterpret_cast<const char*>(str_newSize))));
@@ -447,28 +439,22 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_oldVal,
                             strlen(reinterpret_cast<const char *>(str_oldVal))));
     // Open Json array if we have array value
-    if (pLogData->old_size > 1 && pLogData->type != DBR_CHAR) {
+    if (pLogData->is_array) {
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_array_open(handle));
     }
-    // We have empty array
-    if (pLogData->old_size == 0) {
-        const unsigned char empty_value[] = "<empty>";
-        CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, empty_value,
-                            strlen(reinterpret_cast<const char *>(empty_value))));
-    }
     // We have string
-    else if (pLogData->type == DBF_CHAR){
+    if (pLogData->type == DBR_CHAR){
         fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
-                pold_value, DBF_CHAR, 0);
+                pold_value, DBR_CHAR, 0);
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
                             strlen(reinterpret_cast<const char *>(interBuffer))));
     }
-    // Arrays and scalars (all except DBF_CHAR)
+    // Arrays and scalars (all except DBR_CHAR)
     else {
         for (int i = 0; i < pLogData->old_log_size; i++) {
             fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
             pold_value, pLogData->type, i);
-            if (pLogData->type == DBF_STRING) {
+            if (pLogData->type == DBR_STRING) {
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
                             strlen(reinterpret_cast<char *>(interBuffer))););
             } else {
@@ -478,12 +464,9 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
             }
         }
     }
-    // Close Json array if we have array value
-    if (pLogData->old_size > 1 && pLogData->type != DBR_CHAR) {
+    // Close Json array and add new size, but only if we have array
+    if (pLogData->is_array) {
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_array_close(handle));
-    }
-    // Add new size, but only if we have array
-    if (pLogData->old_size > 1) {
         const unsigned char str_oldSize[] = "old-size";
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_oldSize,
                         strlen(reinterpret_cast<const char*>(str_oldSize))));
@@ -492,8 +475,7 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
 
     // Add minium and maximum values in case of a burst
     if (burst && isDbrNumeric(pLogData->type)
-                && pLogData->old_size == 1
-                && pLogData->new_size == 1) {
+                && !pLogData->is_array) {
         // Add min value
         const unsigned char str_minVal[] = "min";
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_minVal,
