@@ -26,6 +26,7 @@
 #include <epicsThread.h>
 #include <epicsAtomic.h>
 #include <dbAccessDefs.h>
+#include <epicsMath.h>
 #include <dbChannel.h>
 #include <epicsExit.h>
 #include <yajl_gen.h>
@@ -413,15 +414,32 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     // Arrays and scalars (all except DBR_CHAR)
     else {
         for (int i = 0; i < pLogData->new_log_size; i++) {
-            fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
-            &pLogData->new_value.value, pLogData->type, i);
-            if (pLogData->type == DBR_STRING) {
-                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
-                            strlen(reinterpret_cast<char *>(interBuffer))));
-            } else {
-                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_number(handle,
-                            reinterpret_cast<const char *>(interBuffer),
-                            strlen(reinterpret_cast<char *>(interBuffer))));
+            if (this->isNan(&pLogData->new_value.value, pLogData->type, i)){
+                const unsigned char str_Nan[] = "Nan";
+                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_Nan,
+                            strlen(reinterpret_cast<const char *>(str_Nan))));
+            }
+            else if (this->isPInfinity(&pLogData->new_value.value, pLogData->type, i)){
+                const unsigned char str_pinf[] = "Infinity";
+                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_pinf,
+                            strlen(reinterpret_cast<const char *>(str_pinf))));
+            }
+            else if (this->isNInfinity(&pLogData->new_value.value, pLogData->type, i)){
+                const unsigned char str_ninf[] = "-Infinity";
+                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_ninf,
+                            strlen(reinterpret_cast<const char *>(str_ninf))));
+            }
+            else {
+                fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
+                            &pLogData->new_value.value, pLogData->type, i);
+                if (pLogData->type == DBR_STRING) {
+                    CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
+                                strlen(reinterpret_cast<char *>(interBuffer))));
+                } else {
+                    CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_number(handle,
+                                reinterpret_cast<const char *>(interBuffer),
+                                strlen(reinterpret_cast<char *>(interBuffer))));
+                }
             }
         }
     }
@@ -452,15 +470,32 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     // Arrays and scalars (all except DBR_CHAR)
     else {
         for (int i = 0; i < pLogData->old_log_size; i++) {
-            fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
-            pold_value, pLogData->type, i);
-            if (pLogData->type == DBR_STRING) {
-                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
-                            strlen(reinterpret_cast<char *>(interBuffer))););
-            } else {
-                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_number(handle,
-                            reinterpret_cast<const char *>(interBuffer),
-                            strlen(reinterpret_cast<char *>(interBuffer))));
+            if (this->isNan(pold_value, pLogData->type, i)){
+                const unsigned char str_Nan[] = "Nan";
+                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_Nan,
+                            strlen(reinterpret_cast<const char *>(str_Nan))));
+            }
+            else if (this->isPInfinity(pold_value, pLogData->type, i)){
+                const unsigned char str_pinf[] = "Infinity";
+                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_pinf,
+                            strlen(reinterpret_cast<const char *>(str_pinf))));
+            }
+            else if (this->isNInfinity(pold_value, pLogData->type, i)){
+                const unsigned char str_ninf[] = "-Infinity";
+                CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_ninf,
+                            strlen(reinterpret_cast<const char *>(str_ninf))));
+            }
+            else {
+                fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
+                            pold_value, pLogData->type, i);
+                if (pLogData->type == DBR_STRING) {
+                    CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
+                                strlen(reinterpret_cast<char *>(interBuffer))););
+                } else {
+                    CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_number(handle,
+                                reinterpret_cast<const char *>(interBuffer),
+                                strlen(reinterpret_cast<char *>(interBuffer))));
+                }
             }
         }
     }
@@ -671,6 +706,46 @@ int CaPutJsonLogTask::fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval,
                 "caPutJsonLog: failed to convert PV value to a string representation\n");
             return caPutJsonLogError;
     }
+}
+
+
+bool CaPutJsonLogTask::isNan(const VALUE *pval, short type, int index) {
+
+    switch (type) {
+        case DBR_FLOAT:
+            if (isnan(((epicsFloat32 *)pval)[index])) return true;
+            break;
+        case DBR_DOUBLE:
+            if (isnan(((epicsFloat64 *)pval)[index])) return true;
+            break;
+    }
+    return false;
+}
+
+bool CaPutJsonLogTask::isPInfinity(const VALUE *pval, short type, int index) {
+
+    switch (type) {
+        case DBR_FLOAT:
+            if (((epicsFloat32 *)pval)[index] == epicsINF) return true;
+            break;
+        case DBR_DOUBLE:
+            if (((epicsFloat64 *)pval)[index] == epicsINF) return true;
+            break;
+    }
+    return false;
+}
+
+bool CaPutJsonLogTask::isNInfinity(const VALUE *pval, short type, int index) {
+
+    switch (type) {
+        case DBR_FLOAT:
+            if (((epicsFloat32 *)pval)[index] == -epicsINF) return true;
+            break;
+        case DBR_DOUBLE:
+            if (((epicsFloat64 *)pval)[index] == -epicsINF) return true;
+            break;
+    }
+    return false;
 }
 
 
