@@ -39,6 +39,7 @@
 
 #define isDbrNumeric(type) ((type) > DBR_STRING && (type) <= DBR_ENUM)
 
+int caPutLogJsonMsgQueueSize = 1000;
 static const ENV_PARAM EPICS_CA_JSON_PUT_LOG_ADDR = {epicsStrDup("EPICS_CA_JSON_PUT_LOG_ADDR"), epicsStrDup("")};
 
 CaPutJsonLogTask * CaPutJsonLogTask::instance = NULL;
@@ -59,7 +60,7 @@ CaPutJsonLogTask *CaPutJsonLogTask::getInstance() noexcept
 }
 
 CaPutJsonLogTask::CaPutJsonLogTask()
-    : caPutJsonLogQ(1000, sizeof(LOGDATA *)),
+    : caPutJsonLogQ(caPutLogJsonMsgQueueSize, sizeof(LOGDATA *)),
         threadId(NULL),
         taskStopper(false),
         caPutJsonLogClient(NULL),

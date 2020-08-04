@@ -21,6 +21,8 @@
 /* EPICS iocsh shell commands */
 extern "C"
 {
+    extern int caPutLogJsonMsgQueueSize;
+
     /* Initalisation */
     int caPutJsonLogInit(const char * address, caPutJsonLogConfig config){
         CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
@@ -88,4 +90,6 @@ extern "C"
         iocshRegister(&caPutJsonLogShowDef,caPutJsonLogShowCall);
     }
     epicsExportRegistrar(caPutJsonLogRegister);
+
+    epicsExportAddress(int,caPutLogJsonMsgQueueSize);
 }

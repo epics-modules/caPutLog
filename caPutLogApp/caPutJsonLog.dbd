@@ -1,1 +1,2 @@
+variable(caPutLogJsonMsgQueueSize,int)
 registrar(caPutJsonLogRegister)
