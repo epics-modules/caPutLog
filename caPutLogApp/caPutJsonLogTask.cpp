@@ -508,16 +508,16 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     /* Get a JSON as a string */
     std::string json (reinterpret_cast<const char *>(buf));
 
-    /* Log */
-    this->logToServer(json);
+    /* First log to a PV so we can append new line later for the logging to a server */
     this->logToPV(json);
+    this->logToServer(json.append("\n"));
     return caPutJsonLogSuccess;
 }
 
 void CaPutJsonLogTask::logToServer(std::string &msg)
 {
     if (caPutJsonLogClient) {
-        logClientSend(caPutJsonLogClient, msg.append("\n").c_str());
+        logClientSend(caPutJsonLogClient, msg.c_str());
     }
 }
 
