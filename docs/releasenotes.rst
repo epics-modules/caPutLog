@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _R4-0:
+
+Changes since R3-7
+-------------------------
+
+  * add new JSON log format
+
+
 .. _R3-5:
 
 Changes since R3-4
