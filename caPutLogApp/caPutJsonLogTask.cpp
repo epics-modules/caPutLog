@@ -176,11 +176,17 @@ caPutJsonLogStatus CaPutJsonLogTask::configureServerLogging(const char* address)
     struct sockaddr_in saddr;
 
     // Parse the address
-    if (!address || !address[0])
+    if (!address || !address[0]) {
         address = envGetConfigParamPtr(&EPICS_CA_JSON_PUT_LOG_ADDR);
-    status = aToIPAddr (address, this->default_port, &saddr);
+    }
+    if (address == NULL) {
+        errlogSevPrintf(errlogMajor, "caPutJsonLog: server address not specified\n");
+        return caPutJsonLogError;
+    }
+
+    status = aToIPAddr(address, this->default_port, &saddr);
     if (status < 0) {
-        errlogSevPrintf(errlogMinor, "caPutJsonLog: bad address or host name\n");
+        errlogSevPrintf(errlogMajor, "caPutJsonLog: bad address or host name\n");
         return caPutJsonLogError;
     }
 
