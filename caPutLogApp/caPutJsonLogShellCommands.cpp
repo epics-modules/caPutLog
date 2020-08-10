@@ -26,7 +26,7 @@ extern "C"
     /* Initalisation */
     int caPutJsonLogInit(const char * address, caPutJsonLogConfig config){
         CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
-        if (logger != nullptr) return logger->initialize(address, config);
+        if (logger != NULL) return logger->initialize(address, config);
         else return -1;
     }
 
@@ -46,7 +46,7 @@ extern "C"
     /* Reconfigure */
     int caPutJsonLogReconf(caPutJsonLogConfig config){
         CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
-        if (logger != nullptr)  return logger->reconfigure(config);
+        if (logger != NULL)  return logger->reconfigure(config);
         else return -1;
     }
 
@@ -63,7 +63,7 @@ extern "C"
     /* Report */
     int caPutJsonLogShow(int level){
         CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
-        if (logger != nullptr)  return logger->report(level);
+        if (logger != NULL)  return logger->report(level);
         else return -1;
     }
 

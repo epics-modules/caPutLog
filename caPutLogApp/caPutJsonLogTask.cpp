@@ -53,7 +53,7 @@ CaPutJsonLogTask *CaPutJsonLogTask::getInstance()
         }
         catch (...) {
             errlogSevPrintf(errlogMajor, "caPutJsonLog: Failed to construct CA put JSON logger\n");
-            return nullptr;
+            return NULL;
         }
     }
     return instance;
