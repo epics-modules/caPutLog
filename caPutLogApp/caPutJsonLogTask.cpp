@@ -45,7 +45,7 @@ static const ENV_PARAM EPICS_CA_JSON_PUT_LOG_ADDR = {epicsStrDup("EPICS_CA_JSON_
 CaPutJsonLogTask * CaPutJsonLogTask::instance = NULL;
 
 
-CaPutJsonLogTask *CaPutJsonLogTask::getInstance() noexcept
+CaPutJsonLogTask *CaPutJsonLogTask::getInstance()
 {
     if (instance == NULL) {
         try{

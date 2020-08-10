@@ -80,7 +80,7 @@ public:
      *
      * @return CaPutJsonLogTask* Pointer to the only instance of the CaPutJsonLogTask object.
      */
-    static CaPutJsonLogTask* getInstance() noexcept;
+    static CaPutJsonLogTask* getInstance();
 
     /**
      * @brief Initialize the object.
@@ -167,7 +167,9 @@ private:
     CaPutJsonLogTask();
     virtual ~CaPutJsonLogTask();
     CaPutJsonLogTask(const CaPutJsonLogTask&);
-    CaPutJsonLogTask(const CaPutJsonLogTask&&);
+
+    // Commeted as move constructor is c++11 feature, but we want compile on older versions as well
+    // CaPutJsonLogTask(const CaPutJsonLogTask&&);
 
     /**
      * @brief Build a JSON string from and call logToServer() and logToPV() methods to log a message.
