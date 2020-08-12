@@ -5,6 +5,8 @@ include $(TOP)/configure/CONFIG
 
 LIBRARY_IOC = caPutLog
 
+USR_CPPFLAGS += -DUSE_TYPED_RSET
+
 caPutLog_SRCS += caPutLogTask.c
 caPutLog_SRCS += caPutLogAs.c
 caPutLog_SRCS += caPutLogClient.c
