@@ -568,7 +568,17 @@ void CaPutJsonLogTask::logToPV(std::string &msg)
     if (this->pCaPutJsonLogPV != NULL) {
         long status;
 
-        status = dbPutField(this->pCaPutJsonLogPV, DBR_CHAR, msg.c_str(), msg.length());
+        // Waveform record
+        if (this->pCaPutJsonLogPV->field_type == DBR_CHAR) {
+            status = dbPutField(this->pCaPutJsonLogPV, DBR_CHAR, msg.c_str(), msg.length());
+        }
+        // Lso/lsi records
+        else {
+            // As of EPICS base 7.0.4 this still clips at 40 characters
+            // Addint .$ or .VAL$ to the PV name, will use the waveform case and
+            // write the whole string correctly
+             status = dbPutField(this->pCaPutJsonLogPV, DBR_STRING, msg.c_str(), 1);
+        }
 
         if (status) {
             errlogSevPrintf(errlogMajor,
