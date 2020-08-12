@@ -253,6 +253,8 @@ This functionality can be activated by setting the ``EPICS_AS_PUT_LOG_PV`` /
 to the IOC. If the PV is found on the IOC logs will be written to it. If a log is
 too long for the record it will be truncated.
 
+.. note::  As of EPICS base 7.0.1 ``lso``/``lsi`` records will be truncate a message at
+    40 character. As workaround add ``.$`` or ``.VAL$`` to a PV name.
 
 Acknowledgments
 ----------------
