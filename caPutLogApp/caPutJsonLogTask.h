@@ -43,6 +43,12 @@ enum caPutJsonLogConfig {
     caPutJsonLogAllNoFilter =  2  /* log all puts no filtering on same PV*/
 };
 
+enum specialValues {
+    svNormal,
+    svNan,
+    svNinf,
+    svPinf
+};
 
 #ifdef __cplusplus
 
@@ -257,37 +263,14 @@ private:
     int  fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval, short type, int index);
 
     /**
-     * @brief Check if ::VALUE represents Nan (Not a number).
+     * @brief Check for special value (nan, positive/negative infinity) in ::VALUE structure.
      *
      * @param pval ::VALUE to be checked.
      * @param type EPICS DRB_* type stored in the input ::VALUE.
      * @param index Index of the element in case of an array. For scalar values this must be 0.
-     * @return true If ::VALUE represents Nan.
-     * @return false If ::VALUE does not represents Nan.
+     * @return specialValues
      */
-    bool isNan(const VALUE *pval, short type, int index);
-
-    /**
-     * @brief Check if ::VALUE represents positive infinity.
-     *
-     * @param pval ::VALUE to be checked.
-     * @param type EPICS DRB_* type stored in the input ::VALUE.
-     * @param index Index of the element in case of an array. For scalar values this must be 0.
-     * @return true If ::VALUE represents positive infinity.
-     * @return false If ::VALUE does not represents positive infinity.
-     */
-    bool isPInfinity(const VALUE *pval, short type, int index);
-
-        /**
-     * @brief Check if ::VALUE represents negative infinity.
-     *
-     * @param pval ::VALUE to be checked.
-     * @param type EPICS DRB_* type stored in the input ::VALUE.
-     * @param index Index of the element in case of an array. For scalar values this must be 0.
-     * @return true If ::VALUE represents negative infinity.
-     * @return false If ::VALUE does not represents negative infinity.
-     */
-    bool isNInfinity(const VALUE *pval, short type, int index);
+    specialValues testForSpecialValues(const VALUE *pval, short type, int index);
 
 };
 

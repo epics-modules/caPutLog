@@ -421,17 +421,17 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     // Arrays and scalars (all except DBR_CHAR)
     else {
         for (int i = 0; i < pLogData->new_log_size; i++) {
-            if (this->isNan(&pLogData->new_value.value, pLogData->type, i)){
+            if (this->testForSpecialValues(&pLogData->new_value.value, pLogData->type, i) == svNan){
                 const unsigned char str_Nan[] = "Nan";
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_Nan,
                             strlen(reinterpret_cast<const char *>(str_Nan))));
             }
-            else if (this->isPInfinity(&pLogData->new_value.value, pLogData->type, i)){
+            else if (this->testForSpecialValues(&pLogData->new_value.value, pLogData->type, i) == svPinf){
                 const unsigned char str_pinf[] = "Infinity";
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_pinf,
                             strlen(reinterpret_cast<const char *>(str_pinf))));
             }
-            else if (this->isNInfinity(&pLogData->new_value.value, pLogData->type, i)){
+            else if (this->testForSpecialValues(&pLogData->new_value.value, pLogData->type, i)== svNinf){
                 const unsigned char str_ninf[] = "-Infinity";
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_ninf,
                             strlen(reinterpret_cast<const char *>(str_ninf))));
@@ -477,17 +477,17 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     // Arrays and scalars (all except DBR_CHAR)
     else {
         for (int i = 0; i < pLogData->old_log_size; i++) {
-            if (this->isNan(pold_value, pLogData->type, i)){
+            if (this->testForSpecialValues(pold_value, pLogData->type, i) == svNan){
                 const unsigned char str_Nan[] = "Nan";
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_Nan,
                             strlen(reinterpret_cast<const char *>(str_Nan))));
             }
-            else if (this->isPInfinity(pold_value, pLogData->type, i)){
+            else if (this->testForSpecialValues(pold_value, pLogData->type, i) == svPinf){
                 const unsigned char str_pinf[] = "Infinity";
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_pinf,
                             strlen(reinterpret_cast<const char *>(str_pinf))));
             }
-            else if (this->isNInfinity(pold_value, pLogData->type, i)){
+            else if (this->testForSpecialValues(pold_value, pLogData->type, i) == svNinf){
                 const unsigned char str_ninf[] = "-Infinity";
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_ninf,
                             strlen(reinterpret_cast<const char *>(str_ninf))));
@@ -715,44 +715,25 @@ int CaPutJsonLogTask::fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval,
     }
 }
 
+specialValues CaPutJsonLogTask::testForSpecialValues(const VALUE *pval, short type, int index) {
 
-bool CaPutJsonLogTask::isNan(const VALUE *pval, short type, int index) {
-
-    switch (type) {
-        case DBR_FLOAT:
-            if (isnan(((epicsFloat32 *)pval)[index])) return true;
-            break;
-        case DBR_DOUBLE:
-            if (isnan(((epicsFloat64 *)pval)[index])) return true;
-            break;
-    }
-    return false;
-}
-
-bool CaPutJsonLogTask::isPInfinity(const VALUE *pval, short type, int index) {
+    epicsFloat64 d;
 
     switch (type) {
         case DBR_FLOAT:
-            if (((epicsFloat32 *)pval)[index] == epicsINF) return true;
+            d = ((epicsFloat32 *)pval)[index];
             break;
         case DBR_DOUBLE:
-            if (((epicsFloat64 *)pval)[index] == epicsINF) return true;
+            d = ((epicsFloat64 *)pval)[index];
             break;
+        default:
+            return svNormal;
     }
-    return false;
-}
 
-bool CaPutJsonLogTask::isNInfinity(const VALUE *pval, short type, int index) {
-
-    switch (type) {
-        case DBR_FLOAT:
-            if (((epicsFloat32 *)pval)[index] == -epicsINF) return true;
-            break;
-        case DBR_DOUBLE:
-            if (((epicsFloat64 *)pval)[index] == -epicsINF) return true;
-            break;
-    }
-    return false;
+    if (isnan(d)) return svNan;
+    else if (isinf(d) && d > 0) return svPinf;
+    else if (isinf(d) && d < 0) return svNinf;
+    else return svNormal;
 }
 
 
