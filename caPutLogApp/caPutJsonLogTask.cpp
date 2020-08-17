@@ -363,7 +363,7 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     const unsigned char str_date[] = "date";
     CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_date,
                             strlen(reinterpret_cast<const char *>(str_date))));
-    epicsTimeToStrftime(reinterpret_cast<char *>(interBuffer), interBufferSize, "%d-%m-%Y",
+    epicsTimeToStrftime(reinterpret_cast<char *>(interBuffer), interBufferSize, "%Y-%m-%d",
         &pLogData->new_value.time);
     CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
                             strlen(reinterpret_cast<char *>(interBuffer))));
@@ -372,7 +372,7 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     const unsigned char str_time[] = "time";
     CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_time,
                             strlen(reinterpret_cast<const char *>(str_time))));
-    epicsTimeToStrftime(reinterpret_cast<char *>(interBuffer), interBufferSize, "%H:%M:%S",
+    epicsTimeToStrftime(reinterpret_cast<char *>(interBuffer), interBufferSize, "%H:%M:%S.%03f",
         &pLogData->new_value.time);
     CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
                             strlen(reinterpret_cast<char *>(interBuffer))));
