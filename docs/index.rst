@@ -186,8 +186,8 @@ Where Json properties are:
                         startup script. This command is part of the log client build into the EPICS
                         base (and used by this module). As this value is
                         appended at the lower level, currently can not be part of the JSON structure.
-    * **date** date when the caput was made in the following format: dd-mm-yyyy.
-    * **time**  time of the day when the caput was made in the following format: hh-mm-ss (24h format).
+    * **date** date when the caput was made in the following format: yyyy-mm-dd.
+    * **time**  time of the day when the caput was made in the following format: hh-mm-ss.sss (24h format).
     * **client hostname** server/workstation's hostname from which the value was changed.
     * **client username** username of the user who changed the value.
     * **pv name** name of the changed PV.
@@ -216,31 +216,31 @@ Examples
 
 Scalar value: ::
 
-    testIOC{"date":"10-08-2020","time":"13:02:08","host":"devWs","user":"devman","pv":"ao","new":77.5,"old":1}<LF>
+    testIOC{"date":"2020-08-10","time":"13:02:08.124","host":"devWs","user":"devman","pv":"ao","new":77.5,"old":1}<LF>
 
 Burst of scalar values: ::
 
-    testIOC{"date":"10-08-2020","time":"13:08:44","host":"devWs","user":"devman","pv":"ao","new":8,"old":77.5,"min":7.5,"max":870.5}<LF>
+    testIOC{"date":"2020-08-10","time":"13:08:44.144","host":"devWs","user":"devman","pv":"ao","new":8,"old":77.5,"min":7.5,"max":870.5}<LF>
 
 String value: ::
 
-    testIOC{"date":"10-08-2020","time":"13:09:43","host":"devWs","user":"devman","pv":"stringout","new":"Example put on stringout","old":"so1"}<LF>
+    testIOC{"date":"2020-08-10","time":"13:09:43.741","host":"devWs","user":"devman","pv":"stringout","new":"Example put on stringout","old":"so1"}<LF>
 
 Lso/lsi value: ::
 
-    testIOC{"date":"10-08-2020","time":"13:11:07","host":"devWs","user":"devman","pv":"lso.$","new":["Some very long string in lso record 123456789012345678901234567890"],"new-size":67,"old":[""],"old-size":0}<LF>
+    testIOC{"date":"2020-08-10","time":"13:11:07.100","host":"devWs","user":"devman","pv":"lso.$","new":["Some very long string in lso record 123456789012345678901234567890"],"new-size":67,"old":[""],"old-size":0}<LF>
 
 Waveform of doubles: ::
 
-    testIOC{"date":"10-08-2020","time":"13:13:06","host":"devWs","user":"devman","pv":"wfd","new":[4.5,5,10,11],"new-size":4,"old":[],"old-size":0}<LF>
+    testIOC{"date":"2020-08-10","time":"13:13:06.544","host":"devWs","user":"devman","pv":"wfd","new":[4.5,5,10,11],"new-size":4,"old":[],"old-size":0}<LF>
 
 Nan value: ::
 
-    testIOC{"date":"10-08-2020","time":"13:14:31","host":"devWs","user":"devman","pv":"ao","new":"Nan","old":8}<LF>
+    testIOC{"date":"2020-08-10","time":"13:14:31.187","host":"devWs","user":"devman","pv":"ao","new":"Nan","old":8}<LF>
 
 Minus infinity: ::
 
-    testIOC{"date":"10-08-2020","time":"13:15:22","host":"devWs","user":"devman","pv":"ao","new":"-Infinity","old":"Nan"}<LF>
+    testIOC{"date":"2020-08-10","time":"13:15:22.189","host":"devWs","user":"devman","pv":"ao","new":"-Infinity","old":"Nan"}<LF>
 
 
 
