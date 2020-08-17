@@ -1,0 +1,60 @@
+
+
+record(longout, "longout_DBF_STRING") {
+}
+
+record(ao, "ao_DBF_FLOAT") {
+}
+
+record(longout, "longout_DBF_LONG") {
+}
+
+record(longout, "longout_DBF_SHORT") {
+}
+
+record(mbbo, "mbbo_DBF_ENUM") {
+    field(ZRST, "zero_string")        field(ZRVL, 0)
+    field(ONST, "one_string")         field(ONVL, 1)
+    field(TWST, "two_string")         field(TWVL, 2)
+    field(THST, "three_string")       field(THVL, 3)
+    field(FRST, "four_string")        field(FRVL, 4)
+    field(FVST, "five_string")        field(FVVL, 5)
+    field(SXST, "six_string")         field(SXVL, 6)
+    field(SVST, "seven_string")       field(SVVL, 7)
+    field(EIST, "eight_string")       field(EIVL, 8)
+    field(NIST, "nine_string")        field(NIVL, 9)
+    field(TEST, "ten_string")         field(TEVL, 10)
+    field(ELST, "eleven_string")      field(ELVL, 11)
+    field(TVST, "twelve_string")      field(TVVL, 12)
+    field(TTST, "thirteen_string")    field(TTVL, 13)
+    field(FTST, "fourteen_string")    field(FTVL, 14)
+    field(FFST, "fifteen_string")     field(FFVL, 15)
+}
+
+record(longout, "longout_DBF_MENU") {
+}
+
+record(stringout, "stringout_DBF_DEVICE") {
+}
+
+record(stringout, "stringout_DBF_LINK") {
+}
+record(stringout, "stringout_DBF_LINK1") {
+}
+record(stringout, "stringout_DBF_LINK2") {
+}
+
+
+record(waveform, "waveform_DBF_DOUBLE") {
+    field(NELM, "256")
+    field(FTVL, "DOUBLE")
+}
+
+record(waveform, "waveform_DBF_STRING") {
+    field(NELM, "256")
+    field(FTVL, "STRING")
+}
+
+record(lso, "lso_DBF_CHAR") {
+    field(SIZV, "1024")
+}
