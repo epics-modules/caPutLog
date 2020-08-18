@@ -13,6 +13,7 @@
 
 // Standard library includes
 #include <vector>
+#include <sstream>
 #include <string>
 #include <cstring>
 #include <algorithm>
@@ -63,10 +64,21 @@ static std::string logServerAddress;
 static int stopLogServer = 0;
 
 
+
 extern "C" {
     void dbTestIoc_registerRecordDeviceDriver(struct dbBase *);
 }
 
+/*******************************************************************************
+* Helper functions
+*******************************************************************************/
+template<class T>
+std::string toString(T input) {
+
+    std::ostringstream ss;
+    ss << input;
+    return ss.str();
+}
 
 /*******************************************************************************
 * Logger server implementation
@@ -152,7 +164,7 @@ static void logServer(void) {
 
     //Build string address
     logServerAddress.append("localhost:")
-                    .append(std::to_string(htons(actualServerAddr.sin_port)));
+                    .append(toString(htons(actualServerAddr.sin_port)));
 
     pfdctx = (void *) fdmgr_init();
     if (status < 0) {
@@ -186,11 +198,11 @@ static void logServer(void) {
 * Json handling
 *******************************************************************************/
 class JsonParser {
-    bool inArray = false;
-    int arrayCount = 0;
-    bool isArray = false;
+    bool inArray;
+    int arrayCount;
+    bool isArray;
 
-    bool waitingKey = true;
+    bool waitingKey;
     std::string currentKey;
 
 public:
@@ -207,13 +219,20 @@ public:
 
     std::vector<std::string> newVal;
     std::vector<std::string> oldVal;
-    int newSize = -1;
-    int oldSize = -1;
+    int newSize;
+    int oldSize;
 
     double min;
     double max;
 
-    JsonParser() { }
+    JsonParser() :
+        inArray(false),
+        arrayCount(0),
+        isArray(false),
+        waitingKey(true),
+        newSize(-1),
+        oldSize(-1)
+    { }
     ~JsonParser() { }
 
     void parse(std::string jsonLogMsg) {
@@ -259,13 +278,13 @@ public:
         }
 
         if (!jsonParser->currentKey.compare("new")) {
-            jsonParser->newVal.push_back(std::string(std::to_string(integerVal)));
+            jsonParser->newVal.push_back(toString(integerVal));
             if (!jsonParser->inArray) {
                 jsonParser->waitingKey = true;
             }
         }
         else if (!jsonParser->currentKey.compare("old")) {
-            jsonParser->oldVal.push_back(std::string(std::to_string(integerVal)));
+            jsonParser->oldVal.push_back(toString(integerVal));
             if (!jsonParser->inArray) {
                 jsonParser->waitingKey = true;
             }
@@ -302,13 +321,13 @@ public:
         }
 
         if (!jsonParser->currentKey.compare("new")) {
-            jsonParser->newVal.push_back(std::string(std::to_string(doubleVal)));
+            jsonParser->newVal.push_back(toString(doubleVal));
             if (!jsonParser->inArray) {
                 jsonParser->waitingKey = true;
             }
         }
         else if (!jsonParser->currentKey.compare("old")) {
-            jsonParser->oldVal.push_back(std::string(std::to_string(doubleVal)));
+            jsonParser->oldVal.push_back(toString(doubleVal));
             if (!jsonParser->inArray) {
                 jsonParser->waitingKey = true;
             }
@@ -422,8 +441,7 @@ public:
 void commonTests(JsonParser &jsonParser, const char* pvname, const char * testPrefix) {
 
     // Test if is Json terminated with newline
-    std::string lastCharacter (&jsonParser.jsonLogMsg.back());
-    testOk(jsonParser.jsonLogMsg.back() == *"\n",
+    testOk(*jsonParser.jsonLogMsg.rbegin() == *"\n",
             "%s - %s", testPrefix, "New line terminator check");
 
     // Test prefix
@@ -499,7 +517,7 @@ void testDbf(const char *pv, chtype type,
                         "%s - %s", testPrefix, "New value check");
             }
             else {
-                testOk(!json.newVal.at(i).compare(std::to_string(*(value1 + i))),
+                testOk(!json.newVal.at(i).compare(toString(*(value1 + i))),
                         "%s - %s", testPrefix, "New value check");
             }
         }
@@ -535,7 +553,7 @@ void testDbf(const char *pv, chtype type,
                         "%s - %s", testPrefix, "New value check");
             }
             else {
-                testOk(!json.newVal.at(i).compare(std::to_string(*(value2 + i))),
+                testOk(!json.newVal.at(i).compare(toString(*(value2 + i))),
                         "%s - %s", testPrefix, "New value check");
             }
         }
@@ -555,7 +573,7 @@ void testDbf(const char *pv, chtype type,
                         "%s - %s", testPrefix, "New value check");
             }
             else {
-                testOk(!json.oldVal.at(i).compare(std::to_string(*(value1 + i))),
+                testOk(!json.oldVal.at(i).compare(toString(*(value1 + i))),
                         "%s - %s", testPrefix, "New value check");
             }
         }
@@ -866,7 +884,7 @@ MAIN(caPutJsonLogTests)
     asSetFilename("../asg.cfg");
     startIoc();
     CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
-    if (logger == nullptr) testAbort("Failed to initialize logger.");
+    if (logger == NULL) testAbort("Failed to initialize logger.");
     logger->initialize(logServerAddress.c_str(), caPutJsonLogOnChange);
     testDiag("Test IOC ready");
     testIocReady.trigger();
