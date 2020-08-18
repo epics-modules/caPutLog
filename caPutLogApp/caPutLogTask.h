@@ -4,7 +4,6 @@
 #include <shareLib.h>
 #include <dbDefs.h>
 #include <epicsTime.h>
-#include <epicsVersion.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -18,10 +18,7 @@
 #include <string>
 
 // Epics base imports
-#include <envDefs.h>
 #include <logClient.h>
-#include <freeList.h>
-#include <asTrapWrite.h>
 #include <epicsMessageQueue.h>
 #include <dbAddr.h>
 #include <epicsThread.h>

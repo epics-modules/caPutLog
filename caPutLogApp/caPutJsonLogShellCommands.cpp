@@ -12,7 +12,6 @@
 */
 
 #include <errlog.h>
-#include <dbDefs.h>
 #include <iocsh.h>
 #include <epicsExport.h>
 

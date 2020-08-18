@@ -22,12 +22,10 @@
 #include <epicsString.h>
 #include <asLib.h>
 #include <logClient.h>
-#include <freeList.h>
 #include <epicsThread.h>
 #include <epicsAtomic.h>
 #include <dbAccessDefs.h>
 #include <epicsMath.h>
-#include <dbChannel.h>
 #include <epicsExit.h>
 #include <yajl_gen.h>
 
