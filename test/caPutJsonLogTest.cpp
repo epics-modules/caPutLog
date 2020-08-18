@@ -474,6 +474,7 @@ void testDbf(const char *pv, chtype type,
         JsonParser json;
         SEVCHK(ca_array_put(type, value1Size, pchid, (void *) value1), "ca_array_put error");
         SEVCHK(ca_pend_io (CA_PEND_IO_TIMEOUT), "ca_pend_io error");
+        testDiag("Made caput, now waiting for log message to arrive (approx. 5s - 10s)");
         testLogServerMsgReady.wait();
 
         // Parse received Json
@@ -509,6 +510,7 @@ void testDbf(const char *pv, chtype type,
         JsonParser json;
         SEVCHK(ca_array_put(type, value2Size, pchid, (void *) value2), "ca_array_put error");
         SEVCHK(ca_pend_io (CA_PEND_IO_TIMEOUT), "ca_pend_io error");
+        testDiag("Made caput, now waiting for log message to arrive (approx. 5s - 10s)");
         testLogServerMsgReady.wait();
 
         // Parse received Json
@@ -575,6 +577,7 @@ void testDbf<dbr_string_t>(const char *pv, chtype type,
         JsonParser json;
         SEVCHK(ca_array_put(type, value1Size, pchid, (void *) value1), "ca_array_put error");
         SEVCHK(ca_pend_io (CA_PEND_IO_TIMEOUT), "ca_pend_io error");
+        testDiag("Made caput, now waiting for log message to arrive (approx. 5s - 10s)");
         testLogServerMsgReady.wait();
 
         // Parse received Json
@@ -596,6 +599,7 @@ void testDbf<dbr_string_t>(const char *pv, chtype type,
         JsonParser json;
         SEVCHK(ca_array_put(type, value2Size, pchid, (void *) value2), "ca_array_put error");
         SEVCHK(ca_pend_io (CA_PEND_IO_TIMEOUT), "ca_pend_io error");
+        testDiag("Made caput, now waiting for log message to arrive (approx. 5s - 10s)");
         testLogServerMsgReady.wait();
 
         // Parse received Json
@@ -634,6 +638,7 @@ void testDbf(const char *pv, chtype type,
         JsonParser json;
         SEVCHK(ca_array_put(type, value1Size, pchid, (void *) value1), "ca_array_put error");
         SEVCHK(ca_pend_io (CA_PEND_IO_TIMEOUT), "ca_pend_io error");
+        testDiag("Made caput, now waiting for log message to arrive (approx. 5s - 10s)");
         testLogServerMsgReady.wait();
 
         // Parse received Json
@@ -653,6 +658,7 @@ void testDbf(const char *pv, chtype type,
         JsonParser json;
         SEVCHK(ca_array_put(type, value2Size, pchid, (void *) value2), "ca_array_put error");
         SEVCHK(ca_pend_io (CA_PEND_IO_TIMEOUT), "ca_pend_io error");
+        testDiag("Made caput, now waiting for log message to arrive (approx. 5s - 10s)");
         testLogServerMsgReady.wait();
 
         // Parse received Json
