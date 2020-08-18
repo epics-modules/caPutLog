@@ -43,6 +43,7 @@
 
 #include <errlog.h>
 #include <dbDefs.h>
+#include <recSup.h>
 #include <dbAccess.h>
 #include <asLib.h>
 #include <epicsStdio.h>
