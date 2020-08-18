@@ -10,11 +10,8 @@ TARGETS += $(COMMON_DIR)/dbTestIoc.dbd
 dbTestIoc_DBD += base.dbd
 
 # Libraries to which the test executable is linked
-PROD_LIBS += Com
-PROD_LIBS += dbCore
-PROD_LIBS += dbRecStd
-PROD_LIBS += ca
-PROD_LIBS += caPutLog
+PROD_LIBS = caPutLog
+PROD_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 testHarness_SRCS += dbTestIoc_registerRecordDeviceDriver.cpp
 
