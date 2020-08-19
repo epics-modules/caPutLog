@@ -199,8 +199,6 @@ static void logServer(void) {
 *******************************************************************************/
 class JsonParser {
     bool inArray;
-    int arrayCount;
-    bool isArray;
 
     bool waitingKey;
     std::string currentKey;
@@ -227,8 +225,6 @@ public:
 
     JsonParser() :
         inArray(false),
-        arrayCount(0),
-        isArray(false),
         waitingKey(true),
         newSize(-1),
         oldSize(-1)
