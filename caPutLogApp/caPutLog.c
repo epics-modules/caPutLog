@@ -89,7 +89,7 @@ int caPutLogInit (const char *addr_str, int config)
         return caPutLogError;
     }
 
-    status = caPutLogAsInit();
+    status = caPutLogAsInit(caPutLogTaskSend, caPutLogTaskStop);
     if (status) {
         return caPutLogError;
     }

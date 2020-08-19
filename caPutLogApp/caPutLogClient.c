@@ -75,6 +75,10 @@ int caPutLogClientInit (const char *addr_str)
     if (!addr_str || !addr_str[0]) {
         addr_str = envGetConfigParamPtr(&EPICS_CA_PUT_LOG_ADDR);
     }
+    if (addr_str == NULL) {
+        errlogSevPrintf(errlogMajor, "caPutLog: server address not specified\n");
+        return caPutLogError;
+    }
 
     status = aToIPAddr (addr_str, default_port, &saddr);
     if (status<0) {
