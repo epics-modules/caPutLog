@@ -349,7 +349,8 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     bool longSingleString = false;
 
     if ((pLogData->type == DBR_CHAR && pLogData->is_array)      // Waveform string and lso/lsi over CA
-     || (pLogData->type == DBR_STRING && !pLogData->is_array)){ // Lso/lsi string over PVA
+     || (pLogData->type == DBR_STRING && !pLogData->is_array &&
+        (pLogData->new_size > 1 || pLogData->old_size > 1))){   // Lso/lsi string over PVA
         longSingleString = true;
     }
 
