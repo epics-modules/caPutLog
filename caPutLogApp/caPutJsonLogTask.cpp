@@ -354,6 +354,17 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
         longSingleString = true;
     }
 
+    // Dont log if logging is disabled
+    if (this->config == caPutJsonLogNone) {
+        return caPutJsonLogSuccess;
+    }
+
+    // Dont log duplicate values if configured so
+    if (this->config == caPutJsonLogOnChange && !burst) {
+        if (this->compareValue(&pLogData->old_value, &pLogData->new_value.value, pLogData->type))
+            return caPutJsonLogSuccess;
+    }
+
     // Configure yajl generator
     yajl_gen handle = yajl_gen_alloc(NULL);
     if (handle == NULL) {
