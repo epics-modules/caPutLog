@@ -225,8 +225,7 @@ long caPutLogActualArraySize(dbAddr * paddr)
     long nActual;
     long offset;
 
-    if (paddr->no_elements > 1 &&
-             prset->get_array_info) {
+    if (prset->get_array_info) {
         prset->get_array_info(paddr, &nActual, &offset);
     } else {
         nActual = paddr->no_elements;

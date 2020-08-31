@@ -256,6 +256,43 @@ too long for the record it will be truncated.
 .. note::  As of EPICS base 7.0.1 ``lso``/``lsi`` records will be truncate a message at
     40 character. As workaround add ``.$`` or ``.VAL$`` to a PV name.
 
+
+PV Access support
++++++++++++++++++
+
+This module supports single and group ``pvput`` s (PV Access). This feature requires EPICS base support, which
+is not yet released (latest version 7.0.4.1) at the time of writing this.
+
+Single value ``pvput`` s are logged in the same manner as the usual ``caput`` s,
+while group member PVs are logged for each group member separately. PV name is
+in this case composed of the elements hierarchy: ``<group name>:<group member>.<field>``.
+
+Example
+^^^^^^^
+
+Group definition: ::
+
+    record(ai, "point:X") {
+    info(Q:group, {point:
+        {X: {+channel:VAL, +type:plain, +putorder:0}}
+    })
+    }
+    record(ai, "point:Y") {
+    info(Q:group, {point:
+        {Y: {+channel:VAL, +type:plain, +putorder:1}}
+    })
+    }
+
+Put: ::
+
+    pvput point X=1 Y=3
+
+Log output: ::
+
+    testIOC{"date":"2020-08-31","time":"13:39:49.616","host":"10.0.2.15","user":"devman","pv":"point:X.VAL","new":1,"old":0}<LF>
+    testIOC{"date":"2020-08-31","time":"13:39:49.616","host":"10.0.2.15","user":"devman","pv":"point:Y.VAL","new":3,"old":0}<LF>
+
+
 Acknowledgments
 ----------------
 
