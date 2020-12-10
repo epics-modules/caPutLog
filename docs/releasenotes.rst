@@ -10,6 +10,7 @@ Changes since R3-7
   * quote and escape strings in non-JSON logs
   * allow to change time format
   * allow multiple receivers
+  * fix caPutLogReconf which was non-functional
 
 
 .. _R3-5:

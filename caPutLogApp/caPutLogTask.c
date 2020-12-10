@@ -103,12 +103,13 @@ static void val_assign(VALUE *dst, const VALUE *src, short type);
 static void val_dump(LOGDATA *pdata);
 #endif
 
-static int shut_down = FALSE;           /* Shut down flag */
 static DBADDR caPutLogPV;               /* Structure to keep address of Log PV */
 static DBADDR *pcaPutLogPV;             /* Pointer to PV address structure,
                                            also used as a flag whether this
                                            PV is defined or not */
 static epicsMessageQueueId caPutLogQ;   /* Mailbox for caPutLogTask */
+
+static volatile int caPutLogConfig;
 
 #define MAX_MSGS 1000                   /* The length of queue (in messages) */
 #define MSG_SIZE sizeof(LOGDATA*)       /* We store only pointers */
@@ -155,14 +156,17 @@ int caPutLogTaskStart(int config)
         }
     }
 
+    caPutLogConfig = config;
+
     if (epicsThreadGetId("caPutLog")) {
+#if 0
         errlogSevPrintf(errlogInfo, "caPutLog: task already running\n");
+#endif
         return caPutLogSuccess;
     }
-    shut_down = FALSE;
     threadId = epicsThreadCreate("caPutLog", epicsThreadPriorityLow,
         epicsThreadGetStackSize(epicsThreadStackSmall),
-        caPutLogTask, (void*)(size_t)config);
+        caPutLogTask, NULL);
     if (!threadId) {
         errlogSevPrintf(errlogFatal,"caPutLog: thread creation failed\n");
         return caPutLogError;
@@ -170,9 +174,26 @@ int caPutLogTaskStart(int config)
     return caPutLogSuccess;
 }
 
+void caPutLogTaskShow(void)
+{
+    const char *state;
+    switch (caPutLogConfig) {
+        case caPutLogNone: state = "disabled"; break;
+        case caPutLogOnChange: state = "default (on change, squash bursts)"; break;
+        case caPutLogAll: state = "all (same value too, squash bursts)"; break;
+        case caPutLogAllNoFilter: state  = "no filter (every single put)"; break;
+        default: state = "invalid";
+    }
+    printf("caPutLog mode: %d = %s\n", caPutLogConfig, state);
+}
+
 void caPutLogTaskStop(void)
 {
-    shut_down = TRUE;
+    caPutLogConfig = caPutLogNone;
+    printf("waiting for caPutLogTask to terminate\n");
+    while (epicsThreadGetId("caPutLog")) {
+        epicsThreadSleep(1);
+    }
 }
 
 void caPutLogTaskSend(LOGDATA *plogData)
@@ -201,13 +222,18 @@ void caPutLogSetTimeFmt (const char *format)
 static void caPutLogTask(void *arg)
 {
     int sent = FALSE, burst = FALSE;
-    int config = (size_t)arg;
+    int config;
+    int msg_size;
     LOGDATA *pcurrent, *pnext;
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
 
     /* Receive 1st message */
-    epicsMessageQueueReceive(caPutLogQ, &pcurrent, MSG_SIZE);
+    while (caPutLogConfig != caPutLogNone) {
+        msg_size = epicsMessageQueueReceiveWithTimeout(caPutLogQ, &pcurrent, MSG_SIZE, 5.0);
+        if (msg_size != -1) break;
+    }
+    if (caPutLogConfig == caPutLogNone) return;
 
 #if 0
     printf("caPutLog: received a message\n");
@@ -221,11 +247,11 @@ static void caPutLogTask(void *arg)
     val_assign(pmax, &pcurrent->new_value.value, pcurrent->type);
     val_assign(pmin, &pcurrent->new_value.value, pcurrent->type);
 
-    while (!shut_down) {                 /* Main Server Loop */
-        int msg_size;
+    while (caPutLogConfig != caPutLogNone) {                 /* Main Server Loop */
 
         /* Receive next message */
         msg_size = epicsMessageQueueReceiveWithTimeout(caPutLogQ, &pnext, MSG_SIZE, 5.0);
+        config = caPutLogConfig;
 
         if (msg_size == -1) {   /* timeout */
             if (!sent) {
