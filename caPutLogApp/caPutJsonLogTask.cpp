@@ -34,6 +34,7 @@
 #include <yajl_gen.h>
 
 // This module imports
+#define epicsExportSharedSymbols
 #include "caPutLogAs.h"
 #include "caPutLogTask.h"
 #include "caPutJsonLogTask.h"

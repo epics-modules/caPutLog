@@ -281,7 +281,7 @@ extern "C" {
 epicsShareFunc void caddPutToQueue(LOGDATA * plogData);
 epicsShareFunc void caPutJsonLogWorker(void *arg);
 epicsShareFunc void caPutJsonLogExit(void *arg);
-
+epicsShareExtern int caPutLogJsonMsgQueueSize;
 #ifdef __cplusplus
 }
 #endif /*__cplusplus */
