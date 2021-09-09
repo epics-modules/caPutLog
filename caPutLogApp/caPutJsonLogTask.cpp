@@ -346,7 +346,7 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     // The longest message for the buffer can occur in the lso/lsi records which
     // is defined with MAX_ARRAY_SIZE_BYTES, if this is less then 40 then
     // stringin / stringout are the limits
-    size_t interBufferSize = MAX_STRING_SIZE + 1 > MAX_ARRAY_SIZE_BYTES + 1
+    const size_t interBufferSize = MAX_STRING_SIZE + 1 > MAX_ARRAY_SIZE_BYTES + 1
                             ? MAX_STRING_SIZE + 1
                             : MAX_ARRAY_SIZE_BYTES + 1;
     unsigned char interBuffer[interBufferSize];
