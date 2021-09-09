@@ -12,6 +12,7 @@ dbTestIoc_DBD += base.dbd
 # Libraries to which the test executable is linked
 PROD_LIBS = caPutLog
 PROD_LIBS += $(EPICS_BASE_IOC_LIBS)
+PROD_SYS_LIBS_WIN32 += ws2_32
 
 testHarness_SRCS += dbTestIoc_registerRecordDeviceDriver.cpp
 
