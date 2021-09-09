@@ -11,11 +11,8 @@
  * - Initial version.
 */
 
-// Windows needs this macro to avoid confict with min/max macros
-#define NOMINMAX
-
 // Standard library imports
-#include <algorithm>  // Windows needs this for std::min/max
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <string>
