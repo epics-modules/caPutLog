@@ -56,7 +56,7 @@
 #include <asLib.h>
 #include <epicsAssert.h>
 
-#define epicsExportSharedSymbols
+#include <epicsExport.h>
 #include "caPutLog.h"
 #include "caPutLogAs.h"
 #include "caPutLogClient.h"
@@ -99,9 +99,7 @@ static void val_min(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
 static void val_max(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
 static int  val_equal(const VALUE *pa, const VALUE *pb, short type);
 static void val_assign(VALUE *dst, const VALUE *src, short type);
-#if 0
 static void val_dump(LOGDATA *pdata);
-#endif
 
 static DBADDR caPutLogPV;               /* Structure to keep address of Log PV */
 static DBADDR *pcaPutLogPV;             /* Pointer to PV address structure,
@@ -110,6 +108,9 @@ static DBADDR *pcaPutLogPV;             /* Pointer to PV address structure,
 static epicsMessageQueueId caPutLogQ;   /* Mailbox for caPutLogTask */
 
 static volatile int caPutLogConfig;
+
+int caPutLogDebug = 0;
+epicsExportAddress(int, caPutLogDebug);
 
 #define MAX_MSGS 1000                   /* The length of queue (in messages) */
 #define MSG_SIZE sizeof(LOGDATA*)       /* We store only pointers */
@@ -139,10 +140,9 @@ int caPutLogTaskStart(int config)
 
     if (!caPutLogPVEnv || !caPutLogPVEnv[0]) {
         pcaPutLogPV = NULL;     /* If no -- clear pointer */
-#if 0
-        errlogSevPrintf(errlogMinor,
-            "caPutLog: EPICS_AS_PUT_LOG_PV variable not defined. CA Put Logging to PV is disabled\n");
-#endif
+        if (caPutLogDebug)
+            errlogSevPrintf(errlogMinor,
+                "caPutLog: EPICS_AS_PUT_LOG_PV variable not defined. CA Put Logging to PV is disabled\n");
     }
     else {
         long getpv_st;
@@ -159,9 +159,8 @@ int caPutLogTaskStart(int config)
     caPutLogConfig = config;
 
     if (epicsThreadGetId("caPutLog")) {
-#if 0
-        errlogSevPrintf(errlogInfo, "caPutLog: task already running\n");
-#endif
+        if (caPutLogDebug)
+            errlogSevPrintf(errlogInfo, "caPutLog: task already running\n");
         return caPutLogSuccess;
     }
     threadId = epicsThreadCreate("caPutLog", epicsThreadPriorityLow,
@@ -235,10 +234,10 @@ static void caPutLogTask(void *arg)
     }
     if (caPutLogConfig == caPutLogNone) return;
 
-#if 0
-    printf("caPutLog: received a message\n");
-    val_dump(pcurrent);
-#endif
+    if (caPutLogDebug) {
+        printf("caPutLog: received a message\n");
+        val_dump(pcurrent);
+    }
 
     /* Store the initial old_value */
     val_assign(pold, &pcurrent->old_value, pcurrent->type);
@@ -265,11 +264,11 @@ static void caPutLogTask(void *arg)
             errlogSevPrintf(errlogMinor, "caPutLog: discarding incomplete log data message\n");
         }
         else if ((pnext->pfield == pcurrent->pfield) && (config != caPutLogAllNoFilter)) {
+            if (caPutLogDebug) {
+                printf("caPutLog: received a message, same pv\n");
+                val_dump(pnext);
+            }
 
-#if 0
-            printf("caPutLog: received a message, same pv\n");
-            val_dump(pnext);
-#endif
             /* current and next are same pv */
 
             caPutLogDataFree(pcurrent);
@@ -292,11 +291,10 @@ static void caPutLogTask(void *arg)
             }
         }
         else {
-
-#if 0
-            printf("caPutLog: received a message, different pv\n");
-            val_dump(pnext);
-#endif
+            if (caPutLogDebug) {
+                printf("caPutLog: received a message, different pv\n");
+                val_dump(pnext);
+            }
             /* current and next are different pvs */
 
             if (!sent) {
@@ -604,7 +602,6 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
     }
 }
 
-#if 0
 static void val_dump(LOGDATA *pdata)
 {
   char oldbuf[512], newbuf[512], timebuf[64];
@@ -630,4 +627,3 @@ static void val_dump(LOGDATA *pdata)
         printf("new_value.value = %s\n", newbuf);
     }
 }
-#endif

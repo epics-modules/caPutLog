@@ -263,6 +263,12 @@ too long for the record it will be truncated.
 .. note::  As of EPICS base 7.0.1 ``lso``/``lsi`` records will be truncate a message at
     40 character. As workaround add ``.$`` or ``.VAL$`` to a PV name.
 
+Debugging
++++++++++
+
+To switch on debug messages, set ``var caPutLogDebug,1``.
+
+
 Acknowledgments
 ----------------
 
