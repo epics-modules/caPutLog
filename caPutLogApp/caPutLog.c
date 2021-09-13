@@ -45,9 +45,6 @@ void caPutLogShow (int level)
     if (level < 0) level = 0;
     if (level > 2) level = 2;
     caPutLogTaskShow();
-#if 0
-    caPutLogAsShow(level);
-#endif
     caPutLogClientShow(level);
 }
 
