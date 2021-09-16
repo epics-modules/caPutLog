@@ -148,7 +148,6 @@ private:
     static CaPutJsonLogTask *instance;
 
     // Logger configuration
-    const char * address;
     int config; // To modify or read this value only epicsAtomic methods should be used
 
     // Interthread communication
@@ -158,8 +157,13 @@ private:
     epicsThreadId threadId;
     int taskStopper; // To modify or read this value only epicsAtomic methods should be used
 
-    //Logging to a server
-    logClientId caPutJsonLogClient;
+    //Logging to a list of servers
+    struct clientItem {
+        logClientId caPutJsonLogClient;
+        struct clientItem *next;
+        char address[1];
+    } *clients;
+    epicsMutex clientsMutex;
 
     // Logging to a PV
     DBADDR caPutJsonLogPV;

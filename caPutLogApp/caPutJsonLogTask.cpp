@@ -17,6 +17,10 @@
 #include <cstring>
 #include <string>
 
+#ifdef _WIN32
+#define strtok_r strtok_s
+#endif
+
 // Epics Base imports
 #include <epicsStdio.h>
 #include <envDefs.h>
@@ -28,6 +32,7 @@
 #include <dbAccessDefs.h>
 #include <epicsMath.h>
 #include <epicsExit.h>
+#include <cantProceed.h>
 #include <yajl_gen.h>
 
 // This module imports
@@ -63,12 +68,23 @@ CaPutJsonLogTask::CaPutJsonLogTask()
     : caPutJsonLogQ(caPutLogJsonMsgQueueSize, sizeof(LOGDATA *)),
         threadId(NULL),
         taskStopper(false),
-        caPutJsonLogClient(NULL),
+        clients(NULL),
+        clientsMutex(),
         pCaPutJsonLogPV(NULL)
 { }
 
 CaPutJsonLogTask::~CaPutJsonLogTask()
-{ }
+{
+    clientItem *client, *nextclient;
+    epicsMutex::guard_t G(clientsMutex);
+    nextclient = clients;
+    clients = NULL;
+    while (nextclient) {
+        client = nextclient;
+        nextclient = client->next;
+        free(client);
+    }
+}
 
 caPutJsonLogStatus CaPutJsonLogTask::reconfigure(caPutJsonLogConfig config)
 {
@@ -84,22 +100,26 @@ caPutJsonLogStatus CaPutJsonLogTask::reconfigure(caPutJsonLogConfig config)
 
 caPutJsonLogStatus CaPutJsonLogTask::report(int level)
 {
-    if (this->caPutJsonLogClient != NULL) {
-        logClientShow(this->caPutJsonLogClient, level);
+
+    if (clients != NULL) {
+        clientItem *client;
+        epicsMutex::guard_t G(clientsMutex);
+        for (client = clients; client; client = client->next) {
+            logClientShow(client->caPutJsonLogClient, level);
+        }
         return caPutJsonLogSuccess;
     }
     else {
-        errlogSevPrintf(errlogMinor, "caPutJsonLog: log client not initialised\n");
+        errlogSevPrintf(errlogMinor, "caPutJsonLog: no clients initialised\n");
         return caPutJsonLogError;
     }
 }
 
-caPutJsonLogStatus CaPutJsonLogTask::initialize(const char* address, caPutJsonLogConfig config)
+caPutJsonLogStatus CaPutJsonLogTask::initialize(const char* addresslist, caPutJsonLogConfig config)
 {
     caPutJsonLogStatus status;
 
     // Store passed configuration parameters
-    this->address = epicsStrDup(address);
     this->reconfigure(config);
 
     // Check if user enabled the logger
@@ -112,26 +132,44 @@ caPutJsonLogStatus CaPutJsonLogTask::initialize(const char* address, caPutJsonLo
     this->configurePvLogging();
 
     // Initialize server logging
-    if (this->caPutJsonLogClient == NULL) {
-        status = configureServerLogging(address);
-        if (status != caPutJsonLogSuccess) return status;
+    if (!addresslist || !addresslist[0]) {
+        addresslist = envGetConfigParamPtr(&EPICS_CA_JSON_PUT_LOG_ADDR);
     }
-
-    // Start logger
-    status = this->start();
-    if (status != caPutJsonLogSuccess) {
-        return status;
-    }
-
-    // Initialize caPutLogAs
-    status = static_cast<caPutJsonLogStatus>(caPutLogAsInit(caddPutToQueue, NULL));
-    if (status != caPutJsonLogSuccess) {
-        errlogSevPrintf(errlogMinor, "caPutJsonLog: failed to configure Access security\n");
+    if (addresslist == NULL) {
+        errlogSevPrintf(errlogMajor, "caPutJsonLog: server address not specified\n");
         return caPutJsonLogError;
     }
 
-    // Register exit handler
-    epicsAtExit(caPutJsonLogExit, NULL);
+    char *addresslistcopy1, *addresslistcopy2;
+    addresslistcopy2 = addresslistcopy1 = epicsStrDup(addresslist);
+    char *saveptr;
+    while (true) {
+        char *address = strtok_r(addresslistcopy1, " \t\n\r", &saveptr);
+        if (!address) break;
+        addresslistcopy1 = NULL;
+        configureServerLogging(address);
+    }
+    free(addresslistcopy2);
+    if (!clients)
+        return caPutJsonLogError;
+
+    // Start logger if not done already
+    if (!threadId) {
+        status = this->start();
+        if (status != caPutJsonLogSuccess) {
+            return status;
+        }
+
+        // Initialize caPutLogAs
+        status = static_cast<caPutJsonLogStatus>(caPutLogAsInit(caddPutToQueue, NULL));
+        if (status != caPutJsonLogSuccess) {
+            errlogSevPrintf(errlogMinor, "caPutJsonLog: failed to configure Access security\n");
+            return caPutJsonLogError;
+        }
+
+        // Register exit handler
+        epicsAtExit(caPutJsonLogExit, NULL);
+    }
 
     return caPutJsonLogSuccess;
 }
@@ -174,14 +212,15 @@ caPutJsonLogStatus CaPutJsonLogTask::configureServerLogging(const char* address)
 {
     int status;
     struct sockaddr_in saddr;
+    clientItem** pclient;
 
     // Parse the address
-    if (!address || !address[0]) {
-        address = envGetConfigParamPtr(&EPICS_CA_JSON_PUT_LOG_ADDR);
-    }
-    if (address == NULL) {
-        errlogSevPrintf(errlogMajor, "caPutJsonLog: server address not specified\n");
-        return caPutJsonLogError;
+    epicsMutex::guard_t G(clientsMutex);
+    for (pclient = &clients; *pclient; pclient = &(*pclient)->next) {
+        if (strcmp(address, (*pclient)->address) == 0) {
+            fprintf (stderr, "caPutJsonLog: address %s already configured\n", address);
+            return caPutJsonLogSuccess;
+        }
     }
 
     status = aToIPAddr(address, this->default_port, &saddr);
@@ -191,9 +230,15 @@ caPutJsonLogStatus CaPutJsonLogTask::configureServerLogging(const char* address)
     }
 
     // Create log client
-    this->caPutJsonLogClient = logClientCreate(saddr.sin_addr, ntohs(saddr.sin_port));
-    if (this->caPutJsonLogClient == NULL) return caPutJsonLogError;
-
+    *pclient = (clientItem*)callocMustSucceed(1,sizeof(clientItem)+strlen(address),"caPutJsonLog");
+    strcpy((*pclient)->address, address);
+    (*pclient)->caPutJsonLogClient = logClientCreate(saddr.sin_addr, ntohs(saddr.sin_port));
+    if (!(*pclient)->caPutJsonLogClient) {
+        fprintf (stderr, "caPutJsonLog: cannot create logClient %s\n", address);
+        free(*pclient);
+        *pclient = NULL;
+        return caPutJsonLogError;
+    }
     return caPutJsonLogSuccess;
 }
 
@@ -558,8 +603,10 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
 
 void CaPutJsonLogTask::logToServer(std::string &msg)
 {
-    if (caPutJsonLogClient) {
-        logClientSend(caPutJsonLogClient, msg.c_str());
+    clientItem* client;
+    epicsMutex::guard_t G(clientsMutex);
+    for (client = clients; client; client = client->next) {
+        logClientSend (client->caPutJsonLogClient, msg.c_str());
     }
 }
 
