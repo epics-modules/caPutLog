@@ -7,7 +7,9 @@ Changes since R3-7
 -------------------------
 
   * add new JSON log format
-
+  * add support for single and group pvputs
+      Requires EPICS base version which supports this,
+      at the time of writing it's not released yet
 
 .. _R3-5:
 

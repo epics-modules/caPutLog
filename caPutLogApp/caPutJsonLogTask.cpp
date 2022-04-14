@@ -348,6 +348,24 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
                             : MAX_ARRAY_SIZE_BYTES + 1;
     unsigned char interBuffer[interBufferSize];
     yajl_gen_status status;
+    bool longSingleString = false;
+
+    if ((pLogData->type == DBR_CHAR && pLogData->is_array)      // Waveform string and lso/lsi over CA
+     || (pLogData->type == DBR_STRING && !pLogData->is_array &&
+        (pLogData->new_size > 1 || pLogData->old_size > 1))){   // Lso/lsi string over PVA
+        longSingleString = true;
+    }
+
+    // Dont log if logging is disabled
+    if (this->config == caPutJsonLogNone) {
+        return caPutJsonLogSuccess;
+    }
+
+    // Dont log duplicate values if configured so
+    if (this->config == caPutJsonLogOnChange && !burst) {
+        if (this->compareValue(&pLogData->old_value, &pLogData->new_value.value, pLogData->type))
+            return caPutJsonLogSuccess;
+    }
 
     // Configure yajl generator
     yajl_gen handle = yajl_gen_alloc(NULL);
@@ -407,12 +425,12 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
                             strlen(reinterpret_cast<const char *>(str_newVal))));
 
     // Open Json array if we have array value
-    if (pLogData->is_array) {
+    if (pLogData->is_array && !longSingleString) {
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_array_open(handle));
     }
 
-    // We have string
-    if (pLogData->type == DBR_CHAR){
+    // We have long string
+    if (longSingleString){
         fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
                 &pLogData->new_value.value, DBR_CHAR, 0);
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
@@ -451,8 +469,12 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
         }
     }
     //  Close Json array and add new size, but only if we have array
-    if (pLogData->is_array) {
+    if (pLogData->is_array && !longSingleString) {
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_array_close(handle));
+    }
+
+    // Add new size (for arrays and long string)
+    if (pLogData->is_array || longSingleString) {
         const unsigned char str_newSize[] = "new-size";
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_newSize,
                             strlen(reinterpret_cast<const char*>(str_newSize))));
@@ -464,11 +486,11 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_oldVal,
                             strlen(reinterpret_cast<const char *>(str_oldVal))));
     // Open Json array if we have array value
-    if (pLogData->is_array) {
+    if (pLogData->is_array && !longSingleString) {
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_array_open(handle));
     }
-    // We have string
-    if (pLogData->type == DBR_CHAR){
+    // We have long string
+    if (longSingleString){
         fieldVal2Str(reinterpret_cast<char *>(interBuffer), interBufferSize,
                 pold_value, DBR_CHAR, 0);
                 CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, interBuffer,
@@ -507,8 +529,11 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
         }
     }
     // Close Json array and add new size, but only if we have array
-    if (pLogData->is_array) {
+    if (pLogData->is_array && !longSingleString) {
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_array_close(handle));
+    }
+
+    if (pLogData->is_array || longSingleString) {
         const unsigned char str_oldSize[] = "old-size";
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_oldSize,
                         strlen(reinterpret_cast<const char*>(str_oldSize))));
