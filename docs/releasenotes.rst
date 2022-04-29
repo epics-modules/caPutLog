@@ -7,6 +7,11 @@ Changes since R3-7
 -------------------------
 
   * add new JSON log format
+  * quote and escape strings in non-JSON logs
+  * allow to change time format
+  * allow multiple receivers
+  * fix caPutLogReconf which was non-functional
+  * allow to switch on debug messages at run time
 
 
 .. _R3-5:

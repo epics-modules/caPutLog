@@ -8,6 +8,9 @@ LIBRARY_IOC = caPutLog
 USR_CPPFLAGS += -DUSE_TYPED_RSET
 USR_CPPFLAGS_WIN32 += -DNOMINMAX
 
+# set time stamp format:
+#USR_CPPFLAGS+=-DDEFAULT_TIME_FMT="%Y-%m-%d %H:%M:%S.%6f"
+
 caPutLog_SRCS += caPutLogTask.c
 caPutLog_SRCS += caPutLogAs.c
 caPutLog_SRCS += caPutLogClient.c

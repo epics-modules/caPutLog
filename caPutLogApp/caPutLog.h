@@ -20,6 +20,7 @@ extern "C" {
 epicsShareFunc int caPutLogInit (const char *addr_str, int config);
 epicsShareFunc int caPutLogReconf (int config);
 epicsShareFunc void caPutLogShow (int level);
+epicsShareFunc void caPutLogSetTimeFmt (const char *format);
 
 #ifdef __cplusplus
 }

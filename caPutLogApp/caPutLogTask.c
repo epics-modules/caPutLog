@@ -47,6 +47,7 @@
 #include <epicsMessageQueue.h>
 #include <epicsThread.h>
 
+#include <epicsString.h>
 #include <dbFldTypes.h>
 #include <epicsTypes.h>
 #include <dbDefs.h>
@@ -55,7 +56,7 @@
 #include <asLib.h>
 #include <epicsAssert.h>
 
-#define epicsExportSharedSymbols
+#include <epicsExport.h>
 #include "caPutLog.h"
 #include "caPutLogAs.h"
 #include "caPutLogClient.h"
@@ -81,6 +82,15 @@
 
 #define MAX_BUF_SIZE    256     /* Length of log string */
 
+#ifndef DEFAULT_TIME_FMT
+#define DEFAULT_TIME_FMT %d-%b-%y %H:%M:%S
+#endif
+#define STR2(x) #x
+#define STR(x) STR2(x)
+#define DEFAULT_TIME_FMT_STR STR(DEFAULT_TIME_FMT)
+
+static const char *timeFormat = DEFAULT_TIME_FMT_STR;
+
 static void caPutLogTask(void *arg);
 static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
     int burst, const VALUE *pmin, const VALUE *pmax, int config);
@@ -89,16 +99,18 @@ static void val_min(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
 static void val_max(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
 static int  val_equal(const VALUE *pa, const VALUE *pb, short type);
 static void val_assign(VALUE *dst, const VALUE *src, short type);
-#if 0
 static void val_dump(LOGDATA *pdata);
-#endif
 
-static int shut_down = FALSE;           /* Shut down flag */
 static DBADDR caPutLogPV;               /* Structure to keep address of Log PV */
 static DBADDR *pcaPutLogPV;             /* Pointer to PV address structure,
                                            also used as a flag whether this
                                            PV is defined or not */
 static epicsMessageQueueId caPutLogQ;   /* Mailbox for caPutLogTask */
+
+static volatile int caPutLogConfig;
+
+int caPutLogDebug = 0;
+epicsExportAddress(int, caPutLogDebug);
 
 #define MAX_MSGS 1000                   /* The length of queue (in messages) */
 #define MSG_SIZE sizeof(LOGDATA*)       /* We store only pointers */
@@ -128,10 +140,9 @@ int caPutLogTaskStart(int config)
 
     if (!caPutLogPVEnv || !caPutLogPVEnv[0]) {
         pcaPutLogPV = NULL;     /* If no -- clear pointer */
-#if 0
-        errlogSevPrintf(errlogMinor,
-            "caPutLog: EPICS_AS_PUT_LOG_PV variable not defined. CA Put Logging to PV is disabled\n");
-#endif
+        if (caPutLogDebug)
+            errlogSevPrintf(errlogMinor,
+                "caPutLog: EPICS_AS_PUT_LOG_PV variable not defined. CA Put Logging to PV is disabled\n");
     }
     else {
         long getpv_st;
@@ -145,14 +156,16 @@ int caPutLogTaskStart(int config)
         }
     }
 
+    caPutLogConfig = config;
+
     if (epicsThreadGetId("caPutLog")) {
-        errlogSevPrintf(errlogInfo, "caPutLog: task already running\n");
+        if (caPutLogDebug)
+            errlogSevPrintf(errlogInfo, "caPutLog: task already running\n");
         return caPutLogSuccess;
     }
-    shut_down = FALSE;
     threadId = epicsThreadCreate("caPutLog", epicsThreadPriorityLow,
         epicsThreadGetStackSize(epicsThreadStackSmall),
-        caPutLogTask, (void*)(size_t)config);
+        caPutLogTask, NULL);
     if (!threadId) {
         errlogSevPrintf(errlogFatal,"caPutLog: thread creation failed\n");
         return caPutLogError;
@@ -160,36 +173,71 @@ int caPutLogTaskStart(int config)
     return caPutLogSuccess;
 }
 
+void caPutLogTaskShow(void)
+{
+    const char *state;
+    switch (caPutLogConfig) {
+        case caPutLogNone: state = "disabled"; break;
+        case caPutLogOnChange: state = "default (on change, squash bursts)"; break;
+        case caPutLogAll: state = "all (same value too, squash bursts)"; break;
+        case caPutLogAllNoFilter: state  = "no filter (every single put)"; break;
+        default: state = "invalid";
+    }
+    printf("caPutLog mode: %d = %s\n", caPutLogConfig, state);
+}
+
 void caPutLogTaskStop(void)
 {
-    shut_down = TRUE;
+    caPutLogConfig = caPutLogNone;
+    printf("waiting for caPutLogTask to terminate\n");
+    while (epicsThreadGetId("caPutLog")) {
+        epicsThreadSleep(1);
+    }
 }
 
 void caPutLogTaskSend(LOGDATA *plogData)
 {
+    static int overflow = 0;
     if (caPutLogQ) {
         if (!epicsMessageQueueTrySend(caPutLogQ, &plogData, MSG_SIZE))
+        {
+            overflow = 0;
             return;
-        errlogSevPrintf(errlogMinor, "caPutLog: message queue overflow\n");
+        }
+        if (!overflow) {
+            errlogSevPrintf(errlogMinor, "caPutLog: message queue overflow\n");
+            overflow = 1;
+        }
     }
     caPutLogDataFree(plogData);
+}
+
+void caPutLogSetTimeFmt (const char *format)
+{
+    if (format)
+        timeFormat = format;
 }
 
 static void caPutLogTask(void *arg)
 {
     int sent = FALSE, burst = FALSE;
-    int config = (size_t)arg;
+    int config;
+    int msg_size;
     LOGDATA *pcurrent, *pnext;
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
 
     /* Receive 1st message */
-    epicsMessageQueueReceive(caPutLogQ, &pcurrent, MSG_SIZE);
+    while (caPutLogConfig != caPutLogNone) {
+        msg_size = epicsMessageQueueReceiveWithTimeout(caPutLogQ, &pcurrent, MSG_SIZE, 5.0);
+        if (msg_size != -1) break;
+    }
+    if (caPutLogConfig == caPutLogNone) return;
 
-#if 0
-    printf("caPutLog: received a message\n");
-    val_dump(pcurrent);
-#endif
+    if (caPutLogDebug) {
+        printf("caPutLog: received a message\n");
+        val_dump(pcurrent);
+    }
 
     /* Store the initial old_value */
     val_assign(pold, &pcurrent->old_value, pcurrent->type);
@@ -198,11 +246,11 @@ static void caPutLogTask(void *arg)
     val_assign(pmax, &pcurrent->new_value.value, pcurrent->type);
     val_assign(pmin, &pcurrent->new_value.value, pcurrent->type);
 
-    while (!shut_down) {                 /* Main Server Loop */
-        int msg_size;
+    while (caPutLogConfig != caPutLogNone) {                 /* Main Server Loop */
 
         /* Receive next message */
         msg_size = epicsMessageQueueReceiveWithTimeout(caPutLogQ, &pnext, MSG_SIZE, 5.0);
+        config = caPutLogConfig;
 
         if (msg_size == -1) {   /* timeout */
             if (!sent) {
@@ -216,11 +264,11 @@ static void caPutLogTask(void *arg)
             errlogSevPrintf(errlogMinor, "caPutLog: discarding incomplete log data message\n");
         }
         else if ((pnext->pfield == pcurrent->pfield) && (config != caPutLogAllNoFilter)) {
+            if (caPutLogDebug) {
+                printf("caPutLog: received a message, same pv\n");
+                val_dump(pnext);
+            }
 
-#if 0
-            printf("caPutLog: received a message, same pv\n");
-            val_dump(pnext);
-#endif
             /* current and next are same pv */
 
             caPutLogDataFree(pcurrent);
@@ -243,11 +291,10 @@ static void caPutLogTask(void *arg)
             }
         }
         else {
-
-#if 0
-            printf("caPutLog: received a message, different pv\n");
-            val_dump(pnext);
-#endif
+            if (caPutLogDebug) {
+                printf("caPutLog: received a message, different pv\n");
+                val_dump(pnext);
+            }
             /* current and next are different pvs */
 
             if (!sent) {
@@ -316,9 +363,9 @@ static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
     }
 
     /* first comes the time */
-    len = epicsTimeToStrftime(msg, space, "%d-%b-%y %H:%M:%S",
+    len = epicsTimeToStrftime(msg, space, timeFormat,
         &pLogData->new_value.time);
-    /* this should always succeed (18 chars, last time i counted */
+    /* this should always succeed */
     assert(len);
 
     /* host, user, pv_name */
@@ -520,8 +567,8 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
     switch (type) {
     case DBR_CHAR:
        /* CHAR and UCHAR are typically used as SHORTSHORT,
-	* so avoid mounting NULL-bytes into the string
-	*/
+        * so avoid mounting NULL-bytes into the string
+        */
         return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uint8);
     case DBR_UCHAR:
         return epicsSnprintf(pbuf, buflen, "%d", (int)pval->v_uint8);
@@ -545,11 +592,16 @@ static int val_to_string(char *pbuf, size_t buflen, const VALUE *pval, short typ
         return epicsSnprintf(pbuf, buflen, "%llu", pval->v_uint64);
 #endif
     default:
-        return epicsSnprintf(pbuf, buflen, "%s", pval->v_string);
+        if (buflen < 3) return 0;
+        pbuf[0] = '"';
+        epicsStrnEscapedFromRaw(pbuf+1, buflen-2, pval->v_string, strlen(pval->v_string));
+        buflen = strlen(pbuf);
+        pbuf[buflen++] = '"';
+        pbuf[buflen] = 0;
+        return buflen;
     }
 }
 
-#if 0
 static void val_dump(LOGDATA *pdata)
 {
   char oldbuf[512], newbuf[512], timebuf[64];
@@ -575,4 +627,3 @@ static void val_dump(LOGDATA *pdata)
         printf("new_value.value = %s\n", newbuf);
     }
 }
-#endif

@@ -36,6 +36,16 @@ static void caPutLogShowCall(const iocshArgBuf *args)
     caPutLogShow(args[0].ival);
 }
 
+static const iocshArg caPutLogSetTimeFmtArg0 = {"format", iocshArgPersistentString};
+static const iocshArg *const caPutLogSetTimeFmtArgs[] = {
+    &caPutLogSetTimeFmtArg0
+};
+static const iocshFuncDef caPutLogSetTimeFmtDef = {"caPutLogSetTimeFmt", 1, caPutLogSetTimeFmtArgs};
+static void caPutLogSetTimeFmtCall(const iocshArgBuf *args)
+{
+    caPutLogSetTimeFmt(args[0].sval);
+}
+
 static void caPutLogRegister(void)
 {
     static int done = FALSE;
@@ -45,5 +55,6 @@ static void caPutLogRegister(void)
     iocshRegister(&caPutLogInitDef,caPutLogInitCall);
     iocshRegister(&caPutLogReconfDef,caPutLogReconfCall);
     iocshRegister(&caPutLogShowDef,caPutLogShowCall);
+    iocshRegister(&caPutLogSetTimeFmtDef,caPutLogSetTimeFmtCall);
 }
 epicsExportRegistrar(caPutLogRegister);

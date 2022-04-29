@@ -100,6 +100,9 @@ or for JSON output format::
 
 where ``host`` (mandatory argument) is the IP address or host name of the log
 server and ``port`` is optional (the default is 7011).
+To log to multiple hosts, either call the funtion with a space separated list like
+``"host1[:port] host2[:port]"`` or call the function multiple times with different
+hosts.
 
 The environment variable ``EPICS_CA_PUT_LOG_ADDR`` / ``EPICS_CA_PUT_JSON_LOG_ADDR``
 is used if the first parameter to ``caPutLogInit`` / ``caPutJsonLogInit`` is ``NULL``
@@ -135,7 +138,7 @@ Other shell commands for logger are:
    ``caPutLogInit`` / ``caPutJsonLogInit``.
 
 ``caPutLogShow level`` / ``caPutJsonLogShow level``
-   Show information about a running caPutLog,
+   Show information about a running caPutLog, including config parameter.
    level is the usual interest level (0, 1, or 2).
 
 Server
@@ -173,6 +176,10 @@ in rapid succession; in this case only the original and the final value as
 well as the minimum and maximum value are logged. This filtering can be
 disabled by specifying the ``caPutLogAllNoFilter`` (``2``) configuration option.
 
+From release 4 on, string values are quoted and special characters are escaped.
+The default date/time format ``%d-%b-%y %H:%M:%S`` may be changed at compile time
+with the macro DEFAULT_TIME_FMT and/or modified at run time using the shell function
+``caPutLogSetTimeFmt "<date_time_format>"``.
 
 Json Log Format
 +++++++++++++++
@@ -255,6 +262,12 @@ too long for the record it will be truncated.
 
 .. note::  As of EPICS base 7.0.1 ``lso``/``lsi`` records will be truncate a message at
     40 character. As workaround add ``.$`` or ``.VAL$`` to a PV name.
+
+Debugging
++++++++++
+
+To switch on debug messages, set ``var caPutLogDebug,1``.
+
 
 Acknowledgments
 ----------------
