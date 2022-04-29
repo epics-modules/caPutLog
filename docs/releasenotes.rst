@@ -1,36 +1,35 @@
 Release Notes
 =============
 
-.. _R4-0:
+R4-0: Changes since R3-7
+------------------------
 
-Changes since R3-7
--------------------------
+* add new JSON log format
 
-  * add new JSON log format
-  * quote and escape strings in non-JSON logs
-  * allow to change time format
-  * allow multiple receivers
-  * fix caPutLogReconf which was non-functional
-  * allow to switch on debug messages at run time
+* quote and escape strings in non-JSON logs
+
+* allow to change time format
+
+* allow multiple receivers
+
+* fix caPutLogReconf which was non-functional
+
+* allow to switch on debug messages at run time
 
 
-.. _R3-5:
+R3-5: Changes since R3-4
+------------------------
 
-Changes since R3-4
-------------------
+* removed dead code for val_cmp
 
-  * removed dead code for val_cmp
+* prepare for DBR_INT64 & fixed default clauses
 
-  * prepare for DBR_INT64 & fixed default clauses
+* support base-3.15
 
-  * support base-3.15
+* remove missing (in base-3.15) and unneeded include tsDefs.h
 
-  * remove missing (in base-3.15) and unneeded include tsDefs.h
-
-.. _R3-4:
-
-Changes since R3-3-3
---------------------
+R3-4: Changes since R3-3-3
+--------------------------
 
 * expose some internal APIs to support non-IOC servers
 
@@ -41,19 +40,15 @@ Changes since R3-3-3
   send their own data (of type LOGDATA) to the caPutLogTask.
   Apart from a few small fixes normal use on an IOC is unaffected.
 
-.. _R3-3-3:
-
-Changes since R3-3-2
---------------------
+R3-3-3: Changes since R3-3-2
+----------------------------
 
 * replace %T by %H:%M:%S for strftime
 
   Older VxWorks versions do not know the %T format specifier.
 
-.. _R3-3-2:
-
-Changes since R3-3-1
---------------------
+R3-3-2: Changes since R3-3-1
+----------------------------
 
 * base -> 3-14-12-2-1
 
@@ -61,17 +56,13 @@ Changes since R3-3-1
 
 * suppress darcs dist output if -s flag is given to make
 
-.. _R3-3-1:
-
-Changes since R3-3
---------------------
+R3-3-1: Changes since R3-3
+--------------------------
 
 * base release -> 3-14-12-1-1
 
-.. _R3-3:
-
-Changes since R3-2
-------------------
+R3-3: Changes since R3-2
+------------------------
 
 * create documentation with sphinx from rst files
 * minor changes to source code organisation
@@ -79,18 +70,14 @@ Changes since R3-2
 * add configuratuion switch to disable filtering
   (thanks to a patch from David Morris)
 
-.. _R3-2:
-
-Changes since R3-1
-------------------
+R3-2: Changes since R3-1
+------------------------
 
 * fix: do not return void (some compilers dont seem to like this)
 * added some defines that have been removed from base-3.14.11
 
-.. _R3-1:
-
-Changes since R3-0
-------------------
+R3-1: Changes since R3-0
+------------------------
 
 * fixed behavior if field type is not a valid db request type
 * added a web page for distribution and minimal docs
