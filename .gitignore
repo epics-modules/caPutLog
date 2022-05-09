@@ -3,7 +3,7 @@ O.*
 *.swp
 *.log
 bin/
-db/
+/db/
 dbd/
 html/
 include/
