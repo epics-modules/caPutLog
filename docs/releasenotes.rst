@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+R4-1: Changes since R4-0
+------------------------
+
+**This version has not yet been released**
+
+* Prevent crashes by only allowing one set of commands to be registered.
+
 R4-0: Changes since R3-7
 ------------------------
 
