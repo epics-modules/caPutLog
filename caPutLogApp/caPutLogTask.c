@@ -55,6 +55,7 @@
 #include <errlog.h>
 #include <asLib.h>
 #include <epicsAssert.h>
+#include <epicsAtomic.h>
 
 #include <epicsExport.h>
 #include "caPutLog.h"
@@ -111,6 +112,8 @@ static volatile int caPutLogConfig;
 
 int caPutLogDebug = 0;
 epicsExportAddress(int, caPutLogDebug);
+
+int caPutLogTotalCount = 0;
 
 #define MAX_MSGS 1000                   /* The length of queue (in messages) */
 #define MSG_SIZE sizeof(LOGDATA*)       /* We store only pointers */
@@ -184,6 +187,7 @@ void caPutLogTaskShow(void)
         default: state = "invalid";
     }
     printf("caPutLog mode: %d = %s\n", caPutLogConfig, state);
+    printf("caPutLog Total Count: %d\n", epicsAtomicGetIntT(&caPutLogTotalCount));
 }
 
 void caPutLogTaskStop(void)
@@ -285,6 +289,7 @@ static void caPutLogTask(void *arg)
             else {              /* Next put of multiple puts */
                 if (isDbrNumeric(pcurrent->type)) {
                     burst = TRUE;
+                    epicsAtomicIncrIntT(&caPutLogTotalCount);
                     val_max(pmax, &pcurrent->new_value.value, pmax, pcurrent->type);
                     val_min(pmin, &pcurrent->new_value.value, pmin, pcurrent->type);
                 }
