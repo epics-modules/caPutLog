@@ -138,7 +138,7 @@ Other shell commands for logger are:
    ``caPutLogInit`` / ``caPutJsonLogInit``.
 
 ``caPutLogShow level`` / ``caPutJsonLogShow level``
-   Show information about a running caPutLog, including config parameter.
+   Show information about a running caPutLog, including config parameter and total number of logged puts.
    level is the usual interest level (0, 1, or 2).
 
 Server
