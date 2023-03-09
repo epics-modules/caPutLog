@@ -161,7 +161,8 @@ Other shell commands for controlling the logger are:
 ``caPutLogShow level`` / ``caPutJsonLogShow level``
 
    Show information about an active logger, including its current ``config``
-   setting. ``level`` is the usual interest level (0, 1, or 2).
+   setting and total number of logged puts. ``level`` is the usual interest
+   level (0, 1, or 2).
 
 
 Set up a Log Server
