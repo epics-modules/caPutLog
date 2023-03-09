@@ -201,12 +201,13 @@ record.field name, and <change> is either::
 
 or::
 
-   new=<value> old=<value> min=<value> max=<value>
+   new=<value> old=<value> min=<value> max=<value> burst_count=<value>
 
 The latter format means that several puts for the same PV were received in quick
 succession; in this case only the original and final values of the burst as well
-as the minimum and maximum values seen are logged. This burst filtering can be
-disabled by selecting the ``caPutLogAllNoFilter`` (``2``) configuration value.
+as the minimum and maximum values seen are logged. The number of successive puts
+filtered is also logged. This burst filtering can be disabled by selecting the
+``caPutLogAllNoFilter`` (``2``) configuration value.
 
 From release 4.0 on, string values are placed inside quotes, and special
 characters within the string are escaped. The default date/time format
@@ -227,7 +228,8 @@ It looks like this::
         "pv":"<pv name>",
         "new":<new value>,["new-size":<new array size>,]
         "old":<new value>[,"old-size":<old array size>]
-        [,"min":<minimum value>][,"max":<maximum value>]}<LF>
+        [,"min":<minimum value>][,"max":<maximum value>]
+        [,"burst_count":<burst count>]}<LF>
 
 The JSON properties are:
 
@@ -266,6 +268,8 @@ The JSON properties are:
     * **max** value is included only if the burst filtering was applied and
       gives the maximum value of the puts received within the burst period.
 
+    * **burst_count** number of filtered puts in the burst period.
+
 The JSON implementation of the logger added support for arrays and long string
 fields. As these values can get very large, there is a limit to how long the
 **new value** and **old value** properties can be. Each value can use up to 400
@@ -297,7 +301,8 @@ Burst of scalar values::
         "host":"devWs","user":"devman",
         "pv":"ao",
         "new":8,"old":77.5,
-        "min":7.5,"max":870.5}<LF>
+        "min":7.5,"max":870.5,
+        "burst_count"=10}<LF>
 
 String value::
 
@@ -400,4 +405,3 @@ If you have any problems with this module, send me (`Ben Franksen`_) a mail.
 .. _R3-3: releasenotes.rst#r3-3-changes-since-r3-2
 .. _R3-2: releasenotes.rst#r3-2-changes-since-r3-1
 .. _R3-1: releasenotes.rst#r3-1-changes-since-r3-0
-
