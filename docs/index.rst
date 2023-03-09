@@ -169,12 +169,13 @@ record.field name and <change> is one of ::
 
 or ::
 
-   new=<value> old=<value> min=<value> max=<value>
+   new=<value> old=<value> min=<value> max=<value> burst_count=<value>
 
 The latter format means that several puts for the same PV have been received
-in rapid succession; in this case only the original and the final value as
-well as the minimum and maximum value are logged. This filtering can be
-disabled by specifying the ``caPutLogAllNoFilter`` (``2``) configuration option.
+in rapid succession; in this case the original and the final value as
+well as the minimum and maximum value are logged. The number of successive
+puts filtered is also logged.
+This filtering can be  disabled by specifying the ``caPutLogAllNoFilter`` (``2``) configuration option.
 
 From release 4 on, string values are quoted and special characters are escaped.
 The default date/time format ``%d-%b-%y %H:%M:%S`` may be changed at compile time
@@ -186,7 +187,7 @@ Json Log Format
 
 ``caPutJsonLogger`` is using Json as the output format. General format looks like ::
 
-    <iocLogPrefix>{"date":"<date>","time":"<time>","host":"<client hostname>","user":"<client username>","pv":"<pv name>","new":<new value>,["new-size":<new array size>,]"old":<new value>[,"old-size":<old array size>][,"min":<minimum value>][,"max":<maximum value>]}<LF>
+    <iocLogPrefix>{"date":"<date>","time":"<time>","host":"<client hostname>","user":"<client username>","pv":"<pv name>","new":<new value>,["new-size":<new array size>,]"old":<new value>[,"old-size":<old array size>][,"min":<minimum value>][,"max":<maximum value>][,"burst_count":<burst count>]}<LF>
 
 Where Json properties are:
     * **iocLogPrefix** is an optional prefix defined with a ``iocLogPrefix`` command in the IOC
@@ -204,6 +205,7 @@ Where Json properties are:
     * **old array size** is included only if **old value** is an array and contains information of the actual array size on the IOC.
     * **min** value is included only if the burst filtering was applied and tells the minimum value of the puts in the burst period.
     * **max** value is included only if the burst filtering was applied and tells the maximum value of the puts in the burst period.
+    * **burst_count** number of filtered puts in the burst period.
 
 Json implementation of the logger also supports arrays and lso/lsi PVs. As these values
 can get very long, there is currently a limit how long **new value** and **old value** properties can be.
@@ -227,7 +229,7 @@ Scalar value: ::
 
 Burst of scalar values: ::
 
-    testIOC{"date":"2020-08-10","time":"13:08:44.144","host":"devWs","user":"devman","pv":"ao","new":8,"old":77.5,"min":7.5,"max":870.5}<LF>
+    testIOC{"date":"2020-08-10","time":"13:08:44.144","host":"devWs","user":"devman","pv":"ao","new":8,"old":77.5,"min":7.5,"max":870.5,"burst_count"=10}<LF>
 
 String value: ::
 
@@ -314,4 +316,3 @@ If you have any problems with this module, send me (`Ben Franksen`_) a mail.
 .. _R3-3: releasenotes.rst#r3-3-changes-since-r3-2
 .. _R3-2: releasenotes.rst#r3-2-changes-since-r3-1
 .. _R3-1: releasenotes.rst#r3-1-changes-since-r3-0
-
