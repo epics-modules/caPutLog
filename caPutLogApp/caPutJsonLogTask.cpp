@@ -272,7 +272,8 @@ caPutJsonLogStatus CaPutJsonLogTask::configurePvLogging()
 void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
 {
 
-    bool sent = false, burst = false;
+    bool sent = false;
+    int burst = 0;
     LOGDATA *pcurrent, *pnext;
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
@@ -301,7 +302,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
                 buildJsonMsg(pold, pcurrent, burst, pmin, pmax);
                 std::memcpy(pold, &pcurrent->new_value.value, sizeof(VALUE));
                 sent = true;
-                burst = false;
+                burst = 0;
             }
         }
 
@@ -326,12 +327,12 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
                 std::memcpy(pmin, &pcurrent->new_value.value, sizeof(VALUE));
 
                 sent = false;
-                burst = false;
+                burst = 0;
             }
             // Multiple puts within timeout
             else {
                 if (isDbrNumeric(pcurrent->type) && pcurrent->new_size == 1) {
-                    burst = true;
+                    burst++;
                     calculateMax(pmax, &pcurrent->new_value.value, pmax, pcurrent->type);
                     calculateMin(pmin, &pcurrent->new_value.value, pmin, pcurrent->type);
                 }
@@ -356,7 +357,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
             std::memcpy(pmin, &pcurrent->new_value.value, sizeof(VALUE));
 
             sent = false;
-            burst = false;
+            burst = 0;
         }
     }
     epics::atomic::set(this->taskStopper,  false);
@@ -383,7 +384,7 @@ void CaPutJsonLogTask::addPutToQueue(LOGDATA * plogData)
     }
 
 caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const LOGDATA *pLogData,
-                                bool burst, const VALUE *pmin, const VALUE *pmax)
+                                int burst, const VALUE *pmin, const VALUE *pmax)
 {
     // Intermediate message build buffer
     // The longest message for the buffer can occur in the lso/lsi records which
@@ -583,6 +584,12 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_number(handle,
                         reinterpret_cast<const char *>(interBuffer),
                         strlen(reinterpret_cast<char *>(interBuffer))));
+
+        // Add burst count
+        const unsigned char str_burst[] = "burst_count";
+        CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_burst,
+                                strlen(reinterpret_cast<const char *>(str_burst))));
+        CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_integer(handle, burst));
     }
 
     /* Close root map */
