@@ -107,6 +107,7 @@ caPutJsonLogStatus CaPutJsonLogTask::report(int level)
         for (client = clients; client; client = client->next) {
             logClientShow(client->caPutJsonLogClient, level);
         }
+        printf("caPutJsonLog: Total count = %d\n", epics::atomic::get(this->caPutTotalCount));
         return caPutJsonLogSuccess;
     }
     else {
@@ -278,6 +279,8 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
 
+    epics::atomic::set(this->caPutTotalCount, 0);
+
     // Receive 1st message
     this->caPutJsonLogQ.receive(&pcurrent, sizeof(LOGDATA *));
     std::memcpy(pold, &pcurrent->old_value, sizeof(VALUE));
@@ -320,6 +323,8 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
             caPutLogDataFree(pcurrent);
             pcurrent = pnext;
 
+            epics::atomic::increment(this->caPutTotalCount);
+
             // First message after logging
             if (sent) {
                 // Set new initial max & min values
@@ -348,6 +353,8 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
 
             caPutLogDataFree(pcurrent);
             pcurrent = pnext;
+
+            epics::atomic::increment(this->caPutTotalCount);
 
             /* Set new old_value */
             std::memcpy(pold, &pcurrent->old_value, sizeof(VALUE));

@@ -169,6 +169,8 @@ private:
     DBADDR caPutJsonLogPV;
     DBADDR *pCaPutJsonLogPV;
 
+    // Total count of logged puts
+    int caPutTotalCount; // To modify or read this value only epicsAtomic methods should be used
 
     // Class methods (Do not allow public constructors - class is designed as singleton)
     CaPutJsonLogTask();
