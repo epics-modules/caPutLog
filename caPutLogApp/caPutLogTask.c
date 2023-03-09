@@ -108,6 +108,7 @@ static DBADDR *pcaPutLogPV;             /* Pointer to PV address structure,
 static epicsMessageQueueId caPutLogQ;   /* Mailbox for caPutLogTask */
 
 static volatile int caPutLogConfig;
+static volatile double burstTimeout;
 
 int caPutLogDebug = 0;
 epicsExportAddress(int, caPutLogDebug);
@@ -118,7 +119,7 @@ epicsExportAddress(int, caPutLogDebug);
 #define isDbrNumeric(type) ((type) > DBR_STRING && (type) <= DBR_ENUM)
 
 /* Start Rng Log Task */
-int caPutLogTaskStart(int config)
+int caPutLogTaskStart(int config, double timeout)
 {
     epicsThreadId threadId;
     char *caPutLogPVEnv;
@@ -157,6 +158,7 @@ int caPutLogTaskStart(int config)
     }
 
     caPutLogConfig = config;
+    burstTimeout = (timeout > 0.0) ? timeout : DEFAULT_BURST_TIMEOUT;
 
     if (epicsThreadGetId("caPutLog")) {
         if (caPutLogDebug)
@@ -218,11 +220,22 @@ void caPutLogSetTimeFmt (const char *format)
         timeFormat = format;
 }
 
+void caPutLogSetBurstTimeout(double timeout)
+{
+    if (timeout > 0.0) {
+        burstTimeout = timeout;
+    } else {
+        burstTimeout = DEFAULT_BURST_TIMEOUT;
+        errlogSevPrintf(errlogMinor, "caPutLog: invalid timeout value = %f. Setting default value = %f\n", timeout, burstTimeout);
+    }
+}
+
 static void caPutLogTask(void *arg)
 {
     int sent = FALSE, burst = FALSE;
     int config;
     int msg_size;
+    double timeout;
     LOGDATA *pcurrent, *pnext;
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
@@ -248,8 +261,10 @@ static void caPutLogTask(void *arg)
 
     while (caPutLogConfig != caPutLogNone) {                 /* Main Server Loop */
 
+        timeout = burstTimeout;
+
         /* Receive next message */
-        msg_size = epicsMessageQueueReceiveWithTimeout(caPutLogQ, &pnext, MSG_SIZE, 5.0);
+        msg_size = epicsMessageQueueReceiveWithTimeout(caPutLogQ, &pnext, MSG_SIZE, timeout);
         config = caPutLogConfig;
 
         if (msg_size == -1) {   /* timeout */
