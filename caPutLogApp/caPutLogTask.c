@@ -276,9 +276,10 @@ static void caPutLogTask(void *arg)
             }
 
             /* current and next are same pv */
-
             caPutLogDataFree(pcurrent);
             pcurrent = pnext;
+
+            epicsAtomicIncrIntT(&caPutLogTotalCount);
 
             if (sent) {
                 /* Set new initial max & min values */
@@ -291,7 +292,6 @@ static void caPutLogTask(void *arg)
             else {              /* Next put of multiple puts */
                 if (isDbrNumeric(pcurrent->type)) {
                     burst++;
-                    epicsAtomicIncrIntT(&caPutLogTotalCount);
                     val_max(pmax, &pcurrent->new_value.value, pmax, pcurrent->type);
                     val_min(pmin, &pcurrent->new_value.value, pmin, pcurrent->type);
                 }
@@ -311,6 +311,8 @@ static void caPutLogTask(void *arg)
 
             caPutLogDataFree(pcurrent);
             pcurrent = pnext;
+
+            epicsAtomicIncrIntT(&caPutLogTotalCount);
 
             /* Set new old_value */
             val_assign(pold, &pcurrent->old_value, pcurrent->type);
