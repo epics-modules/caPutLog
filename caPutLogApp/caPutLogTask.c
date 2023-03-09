@@ -224,9 +224,11 @@ void caPutLogSetTimeFmt (const char *format)
 
 static void caPutLogTask(void *arg)
 {
-    int sent = FALSE, burst = FALSE;
+    int sent = FALSE;
+    int burst = 0;
     int config;
     int msg_size;
+
     LOGDATA *pcurrent, *pnext;
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
@@ -261,7 +263,7 @@ static void caPutLogTask(void *arg)
                 log_msg(pold, pcurrent, burst, pmin, pmax, config);
                 val_assign(pold, &pcurrent->new_value.value, pcurrent->type);
                 sent = TRUE;
-                burst = FALSE;
+                burst = 0;
             }
         }
         else if (msg_size != MSG_SIZE) {
@@ -284,11 +286,11 @@ static void caPutLogTask(void *arg)
                 val_assign(pmin, &pcurrent->new_value.value, pcurrent->type);
 
                 sent = FALSE;
-                burst = FALSE;   /* First message after logging */
+                burst = 0;   /* First message after logging */
             }
             else {              /* Next put of multiple puts */
                 if (isDbrNumeric(pcurrent->type)) {
-                    burst = TRUE;
+                    burst++;
                     epicsAtomicIncrIntT(&caPutLogTotalCount);
                     val_max(pmax, &pcurrent->new_value.value, pmax, pcurrent->type);
                     val_min(pmin, &pcurrent->new_value.value, pmin, pcurrent->type);
@@ -318,7 +320,7 @@ static void caPutLogTask(void *arg)
             val_assign(pmin, &pcurrent->new_value.value, pcurrent->type);
 
             sent = FALSE;
-            burst = FALSE;
+            burst = 0;
         }
     }
     errlogSevPrintf(errlogInfo, "caPutLog: log task exiting\n");
@@ -401,6 +403,10 @@ static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
         len += epicsSnprintf(msg+len, space-len, " max=");
         if (len >= space) { do_log(msg, space-1, YES); return; }
         len += val_to_string(msg+len, space-len, pmax, pLogData->type);
+        if (len >= space) { do_log(msg, space-1, YES); return; }
+
+        /* burst count */
+        len += epicsSnprintf(msg+len, space-len, " burst_count=%d", burst);
         if (len >= space) { do_log(msg, space-1, YES); return; }
     }
     do_log(msg, len, NO);
