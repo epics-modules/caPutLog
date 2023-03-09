@@ -55,7 +55,7 @@ enum specialValues {
  * \code{.txt}
  * <iocLogPrefix>{"date": "<dd>-<mm>-<yyyy>"","time":"<hh>:<mm>:<ss>","host":"<client hostname>","user":"<client username>","pv":"<pv name>","new":<new value>,"old":"<old value>"}\n
  * \endcode
- * Burst puts add extra JSON properties (supported only for numberic scalar puts):
+ * Burst puts add extra JSON properties (supported only for numeric scalar puts):
  *  - "min": Which is a minimum value inside the burst period
  *  - "max": Represents maximum value inside the burst of puts
  * Array puts add following JSON properties:
@@ -183,13 +183,13 @@ private:
      *
      * @param pold_value Pointer to a ::VALUE structure holding an old PV value.
      * @param pLogData Pointer to a ::LOGDATA structure holding new value and other meta databa about the put.
-     * @param burst Boolean value. It determinate if put was a burst of values.
+     * @param burst Integer value. Indicates the number of burst of values, if any.
      * @param pmin Pointer to a ::VALUE structure holding an min value if burst is true.
      * @param pmax Pointer to a ::VALUE structure holding an max value if burst is true.
      * @return int Status code.
      */
     caPutJsonLogStatus buildJsonMsg(const VALUE *pold_value, const LOGDATA *pLogData,
-            bool burst, const VALUE *pmin, const VALUE *pmax);
+            int burst, const VALUE *pmin, const VALUE *pmax);
 
     /**
      * @brief Configure logging to a server.
