@@ -144,7 +144,7 @@ public:
 
 private:
 
-    // Singelton instance of this class.
+    // Singleton instance of this class.
     static CaPutJsonLogTask *instance;
 
     // Logger configuration
