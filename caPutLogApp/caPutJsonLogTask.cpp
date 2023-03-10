@@ -593,7 +593,7 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
                         strlen(reinterpret_cast<char *>(interBuffer))));
 
         // Add burst count
-        const unsigned char str_burst[] = "burst_count";
+        const unsigned char str_burst[] = "burst";
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle, str_burst,
                                 strlen(reinterpret_cast<const char *>(str_burst))));
         CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_integer(handle, burst));
