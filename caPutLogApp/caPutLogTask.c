@@ -408,7 +408,7 @@ static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
         if (len >= space) { do_log(msg, space-1, YES); return; }
 
         /* burst count */
-        len += epicsSnprintf(msg+len, space-len, " burst_count=%d", burst);
+        len += epicsSnprintf(msg+len, space-len, " burst=%d", burst);
         if (len >= space) { do_log(msg, space-1, YES); return; }
     }
     do_log(msg, len, NO);
