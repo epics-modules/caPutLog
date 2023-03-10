@@ -202,7 +202,7 @@ record.field name, and <change> is either::
 
 or::
 
-   new=<value> old=<value> min=<value> max=<value> burst_count=<value>
+   new=<value> old=<value> min=<value> max=<value> burst=<value>
 
 The latter format means that several puts for the same PV were received in quick
 succession; in this case only the original and final values of the burst as well
@@ -230,7 +230,7 @@ It looks like this::
         "new":<new value>,["new-size":<new array size>,]
         "old":<new value>[,"old-size":<old array size>]
         [,"min":<minimum value>][,"max":<maximum value>]
-        [,"burst_count":<burst count>]}<LF>
+        [,"burst":<burst count>]}<LF>
 
 The JSON properties are:
 
@@ -269,7 +269,7 @@ The JSON properties are:
     * **max** value is included only if the burst filtering was applied and
       gives the maximum value of the puts received within the burst period.
 
-    * **burst_count** number of filtered puts in the burst period.
+    * **burst** number of filtered puts in the burst period.
 
 The JSON implementation of the logger added support for arrays and long string
 fields. As these values can get very large, there is a limit to how long the
@@ -303,7 +303,7 @@ Burst of scalar values::
         "pv":"ao",
         "new":8,"old":77.5,
         "min":7.5,"max":870.5,
-        "burst_count"=10}<LF>
+        "burst"=10}<LF>
 
 String value::
 
