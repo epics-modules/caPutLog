@@ -377,6 +377,7 @@ void CaPutJsonLogTask::addPutToQueue(LOGDATA * plogData)
     flag = call; \
     if (flag != yajl_gen_status_ok) { \
         errlogSevPrintf(errlogMinor, "caPutJsonLog: JSON generation error\n"); \
+        yajl_gen_free(handle); \
         return caPutJsonLogError; \
     } \
     }
@@ -598,6 +599,7 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     /* First log to a PV so we can append new line later for the logging to a server */
     this->logToPV(json);
     this->logToServer(json.append("\n"));
+    yajl_gen_free(handle);
     return caPutJsonLogSuccess;
 }
 
