@@ -133,6 +133,26 @@ caPutJsonLogStatus CaPutJsonLogTask::addMetadata(std::string property, std::stri
     return caPutJsonLogSuccess;
 }
 
+bool CaPutJsonLogTask::isMetadataKey(std::string property)
+{
+    return metadata.count(property) > 0;
+}
+
+void CaPutJsonLogTask::removeAllMetadata()
+{
+    metadata.clear();
+}
+
+size_t CaPutJsonLogTask::metadataCount()
+{
+    return metadata.size();
+}
+
+std::map<std::string, std::string> CaPutJsonLogTask::getMetadata()
+{
+    return metadata;
+}
+
 caPutJsonLogStatus CaPutJsonLogTask::initialize(const char* addresslist, caPutJsonLogConfig config)
 {
     caPutJsonLogStatus status;
