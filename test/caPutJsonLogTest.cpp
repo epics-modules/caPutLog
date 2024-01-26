@@ -62,6 +62,7 @@ static epicsEvent testLogServerMsgReady;
 static dbEventCtx testEvtCtx;
 static std::string logServerAddress;
 static int stopLogServer = 0;
+CaPutJsonLogTask *logger;
 
 
 
@@ -97,7 +98,7 @@ static void readFromClient(void *pParam)
     memset(recvbuf, 0, BUFFER_SIZE);
     recvLength = recv(insock, recvbuf, BUFFER_SIZE, 0);
     if (recvLength > 0) {
-        incLogMsg.append(recvbuf);
+        incLogMsg.append(recvbuf, recvLength);
         if (incLogMsg.find('\n') != std::string::npos) {
             testLogServerMsgReady.trigger();
         }
@@ -217,6 +218,7 @@ public:
 
     std::vector<std::string> newVal;
     std::vector<std::string> oldVal;
+    std::map<std::string, std::string> metadata;
     int newSize;
     int oldSize;
 
@@ -383,6 +385,18 @@ public:
                 jsonParser->waitingKey = true;
             }
         }
+        else if (logger->isMetadataKey(jsonParser->currentKey)) {
+            std::pair<std::map<std::string, std::string>::iterator, bool> ret;
+            ret = jsonParser->metadata.insert(std::pair<std::string, std::string>(jsonParser->currentKey,
+                  std::string(reinterpret_cast<const char *>(stringVal), stringLen)));
+            if (ret.second == false) {
+                testAbort("caPutJsonLog: fail to add property %s to json log\n", jsonParser->currentKey.c_str());
+                return caPutJsonLogError;
+            }
+            if (!jsonParser->inArray) {
+                jsonParser->waitingKey = true;
+            }
+        }
         else {
             testAbort("JsonParser: Unexpected string callback in Json");
             return 0;
@@ -427,13 +441,19 @@ public:
         jsonParser->currentKey.assign(reinterpret_cast<const char *>(key), stringLen);
         jsonParser->waitingKey = false;
         return 1;
-   }
+   } 
 };
 
 
 /*******************************************************************************
 * Tests helpers
 *******************************************************************************/
+bool metadata_compare (std::map<std::string, std::string> metadataA, std::map<std::string, std::string> metadataB) {
+       bool testSize = metadataA.size() == metadataB.size();
+       bool testContent = std::equal(metadataA.begin(), metadataA.end(), metadataB.begin());
+       return testSize && testContent;
+   }
+
 void commonTests(JsonParser &jsonParser, const char* pvname, const char * testPrefix) {
 
     // Test if is Json terminated with newline
@@ -471,6 +491,11 @@ void commonTests(JsonParser &jsonParser, const char* pvname, const char * testPr
 
     testOk(!jsonParser.pv.compare(pvname),
             "%s - %s", testPrefix, "PV name check");
+
+    //Test Metadata
+    testOk(metadata_compare(jsonParser.metadata, logger->getMetadata()),
+            "%s - %s - Parser(%lu) vs Logger(%lu)", testPrefix, "Metadata keys and values check",
+            logger->metadataCount(), jsonParser.metadata.size());
 }
 
 template<class T>
@@ -692,6 +717,20 @@ void testDbf(const char *pv, chtype type,
     }
 }
 
+void testMetadataHelper(std::map<std::string, std::string> metadata )
+{
+    char desc1[] = "Description 1";
+    char desc2[] = "Description 2";
+    std::map<std::string, std::string>::iterator meta_it;
+    for(meta_it = metadata.begin(); meta_it != metadata.end(); meta_it++){
+        logger->addMetadata(meta_it->first,meta_it->second);
+    }
+    testDbf<dbr_string_t>("longout_DBF_STRING.DESC", DBR_STRING, desc1, 1, desc2, 1, "Metadata test");
+    testOk(metadata_compare(metadata, logger->getMetadata()),
+             "Metadata test - Metadata keys and values check - Original test(%lu) vs Logger(%lu)",
+             metadata.size(), logger->metadataCount());
+    logger->removeAllMetadata();
+}
 
 /*******************************************************************************
 * Tests
@@ -812,6 +851,39 @@ void runTests(void *arg) {
            &charArray1[0], strlen(charArray1), &charArray2[0], strlen(charArray1), "DBF_CHAR array (lso) test");
 
 
+    // Test metadata
+    std::map<std::string, std::string> metadata_test_single = {
+        {"ABCDEFGHIJKLMNOPQRS", "1234567890_1234567890"}
+    };
+    std::map<std::string, std::string> metadata_test_escape_chars = {
+        {"ABC\n##&¤67&nbsp; space&#160&&#160;\'\\n#", "CBC\n##&¤67&nbsp; space&#160&&#160;\'\\n#"}
+    };
+    std::map<std::string, std::string> metadata_test_multiple = {
+        {"One", "1"}, {"Two", "2"}, {"Three", "3"}, {"Four", "4"}, {"Five", "5"},
+        {"Six", "6"}, {"Seven", "7"}, {"Eight", "8"}, {"Nine", "9"}, {"Ten", "10"},
+    };
+
+    std::map<std::string, std::string> metadata_test_reinsert_new_val = {
+        {"Five", "5"}, {"Six", "6"},
+    };
+
+    testMetadataHelper(metadata_test_single);
+    testMetadataHelper(metadata_test_escape_chars);
+    testMetadataHelper(metadata_test_multiple);
+
+    //Reinsert metadata test
+    logger->addMetadata("Five", "Five");
+    logger->addMetadata("Six", "Six");
+    testMetadataHelper(metadata_test_reinsert_new_val);
+
+    // 1000+ elements in metadata
+    std::map<std::string, std::string> metadata_test_big;
+    for(int i = 0; i <=100; i++)
+    {
+        metadata_test_big.insert(std::pair<std::string, std::string>(std::to_string(i), std::to_string(i)));
+    }
+    testMetadataHelper(metadata_test_big);
+
     //Destroy test thread CA context
     ca_context_destroy();
 
@@ -844,7 +916,7 @@ void stopIoc(){
 MAIN(caPutJsonLogTests)
 {
 
-    testPlan(375);
+    testPlan(499);
 
     // Create thread for log server
     const char * logServerThreadName = "testLogServer";
@@ -879,7 +951,7 @@ MAIN(caPutJsonLogTests)
     iocLogPrefix(logMsgPrefix);
     asSetFilename("../asg.cfg");
     startIoc();
-    CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
+    logger =  CaPutJsonLogTask::getInstance();
     if (logger == NULL) testAbort("Failed to initialize logger.");
     logger->initialize(logServerAddress.c_str(), caPutJsonLogOnChange);
     testDiag("Test IOC ready");
