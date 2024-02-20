@@ -104,7 +104,7 @@ To log to multiple hosts, either call the funtion with a space separated list li
 ``"host1[:port] host2[:port]"`` or call the function multiple times with different
 hosts.
 
-The environment variable ``EPICS_CA_PUT_LOG_ADDR`` / ``EPICS_CA_PUT_JSON_LOG_ADDR``
+The environment variable ``EPICS_CA_PUT_LOG_ADDR`` / ``EPICS_CA_JSON_PUT_LOG_ADDR``
 is used if the first parameter to ``caPutLogInit`` / ``caPutJsonLogInit`` is ``NULL``
 or the empty string, respectively.
 
