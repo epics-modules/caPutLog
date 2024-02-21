@@ -122,6 +122,13 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
     LOGDATA *plogData;
     long options, num_elm;
     long status;
+    /*
+     * tmp_addr is used so that we don't overwrite the original pchan when we
+     * call get_array_info from caPutLogActualArraySize.
+     */
+    dbAddr tmp_addr;
+
+    memcpy(&tmp_addr, paddr, sizeof(dbAddr));
 
     if (!afterPut) {                    /* before put */
         plogData = caPutLogDataCalloc();
@@ -153,7 +160,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
         status = dbGetField(
             paddr, plogData->type, &plogData->old_value, &options, &num_elm, 0);
         plogData->old_log_size = num_elm;
-        plogData->old_size = caPutLogActualArraySize(paddr);
+        plogData->old_size = caPutLogActualArraySize(&tmp_addr);
         plogData->is_array = paddr->no_elements > 1 ? TRUE : FALSE;
 
         if (status) {
@@ -172,7 +179,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
         status = dbGetField(
             paddr, plogData->type, &plogData->new_value, &options, &num_elm, 0);
         plogData->new_log_size = num_elm;
-        plogData->new_size = caPutLogActualArraySize(paddr);
+        plogData->new_size = caPutLogActualArraySize(&tmp_addr);
         plogData->is_array = plogData->is_array || paddr->no_elements > 1 ? TRUE : FALSE;
 
         if (status) {
