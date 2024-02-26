@@ -881,7 +881,7 @@ MAIN(caPutJsonLogTests)
     startIoc();
     CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
     if (logger == NULL) testAbort("Failed to initialize logger.");
-    logger->initialize(logServerAddress.c_str(), caPutJsonLogOnChange);
+    logger->initialize(logServerAddress.c_str(), caPutJsonLogOnChange, 5.0);
     testDiag("Test IOC ready");
     testIocReady.trigger();
 

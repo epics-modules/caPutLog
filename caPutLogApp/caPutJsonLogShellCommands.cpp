@@ -23,40 +23,44 @@ extern "C"
     extern int caPutLogJsonMsgQueueSize;
 
     /* Initalisation */
-    int caPutJsonLogInit(const char * address, caPutJsonLogConfig config){
+    int caPutJsonLogInit(const char * address, caPutJsonLogConfig config, double timeout){
         CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
-        if (logger != NULL) return logger->initialize(address, config);
+        if (logger != NULL) return logger->initialize(address, config, timeout);
         else return -1;
     }
 
     static const iocshArg caPutJsonLogInitArg0 = {"address", iocshArgString};
     static const iocshArg caPutJsonLogInitArg1 = {"config", iocshArgInt};
+    static const iocshArg caPutJsonLogInitArg2 = {"burst timeout", iocshArgDouble};
     static const iocshArg *const caPutJsonLogInitArgs[] = {
         &caPutJsonLogInitArg0,
-        &caPutJsonLogInitArg1
+        &caPutJsonLogInitArg1,
+        &caPutJsonLogInitArg2
     };
-    static const iocshFuncDef caPutjsonLogInitDef = {"caPutJsonLogInit", 2, caPutJsonLogInitArgs};
+    static const iocshFuncDef caPutjsonLogInitDef = {"caPutJsonLogInit", 3, caPutJsonLogInitArgs};
     static void caPutJsonLogInitCall(const iocshArgBuf *args)
     {
-        caPutJsonLogInit(args[0].sval, static_cast<caPutJsonLogConfig>(args[1].ival));
+        caPutJsonLogInit(args[0].sval, static_cast<caPutJsonLogConfig>(args[1].ival), args[2].dval);
     }
 
 
     /* Reconfigure */
-    int caPutJsonLogReconf(caPutJsonLogConfig config){
+    int caPutJsonLogReconf(caPutJsonLogConfig config, double timeout){
         CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
-        if (logger != NULL)  return logger->reconfigure(config);
+        if (logger != NULL)  return logger->reconfigure(config, timeout);
         else return -1;
     }
 
     static const iocshArg caPutJsonLogReconfArg0 = {"config", iocshArgInt};
+    static const iocshArg caPutJsonLogReconfArg1 = {"burst timeout", iocshArgDouble};
     static const iocshArg *const caPutJsonLogReconfArgs[] = {
-        &caPutJsonLogReconfArg0
+        &caPutJsonLogReconfArg0,
+        &caPutJsonLogReconfArg1
     };
     static const iocshFuncDef caPutJsonLogReconfDef = {"caPutJsonLogReconf", 1, caPutJsonLogReconfArgs};
     static void caPutJsonLogReconfCall(const iocshArgBuf *args)
     {
-        caPutJsonLogReconf(static_cast<caPutJsonLogConfig>(args[0].ival));
+        caPutJsonLogReconf(static_cast<caPutJsonLogConfig>(args[0].ival), args[1].dval);
     }
 
     /* Report */
@@ -76,6 +80,22 @@ extern "C"
         caPutJsonLogShow(args[0].ival);
     }
 
+    /* Change burst filter timeout */
+    int caPutJsonLogSetBurstTimeout(double timeout){
+        CaPutJsonLogTask *logger =  CaPutJsonLogTask::getInstance();
+        if (logger != NULL)  return logger->setBurstTimeout(timeout);
+        else return -1;
+    }
+
+    static const iocshArg caPutJsonLogSetBurstTimeoutArg0 = {"burst timeout", iocshArgDouble};
+    static const iocshArg *const caPutJsonLogSetBurstTimeoutArgs[] = {
+        &caPutJsonLogSetBurstTimeoutArg0
+    };
+    static const iocshFuncDef caPutJsonLogSetBurstTimeoutDef = {"caPutJsonLogSetBurstTimeout", 1, caPutJsonLogSetBurstTimeoutArgs};
+    static void caPutJsonLogSetBurstTimeoutCall(const iocshArgBuf *args)
+    {
+        caPutJsonLogSetBurstTimeout(args[0].dval);
+    }
 
     /* Register IOCsh commands */
     static void caPutJsonLogRegister(void)
@@ -87,6 +107,7 @@ extern "C"
         iocshRegister(&caPutjsonLogInitDef,caPutJsonLogInitCall);
         iocshRegister(&caPutJsonLogReconfDef,caPutJsonLogReconfCall);
         iocshRegister(&caPutJsonLogShowDef,caPutJsonLogShowCall);
+        iocshRegister(&caPutJsonLogSetBurstTimeoutDef,caPutJsonLogSetBurstTimeoutCall);
     }
     epicsExportRegistrar(caPutJsonLogRegister);
 
