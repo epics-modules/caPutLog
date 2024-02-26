@@ -21,6 +21,7 @@
 #include <logClient.h>
 #include <epicsMessageQueue.h>
 #include <dbAddr.h>
+#include <map>
 #include <epicsThread.h>
 
 // Includes from this module
@@ -142,6 +143,41 @@ public:
      */
     caPutJsonLogStatus report(int level);
 
+    /**
+     * @brief Add IOC metadata to json output
+     *
+     * @param property JSON property
+     * @param value Value associated with property
+     */
+    caPutJsonLogStatus addMetadata(std::string property, std::string value);
+
+    /**
+     * @brief Check if a property is a key in the metadata map
+     *
+     * @param property JSON property
+     * @return bool Status.
+     */
+    bool isMetadataKey(std::string property);
+
+    /**
+     * @brief Clears the metadata map
+     */
+    void removeAllMetadata();
+
+    /**
+     * @brief Gets the number of elements in the metadata map
+     *
+     * @return size_t Number of elements in metadata
+     */
+    size_t metadataCount();
+
+    /**
+     * @brief Gets the metadata list object
+     *
+     * @return map<string, string> the Metadata map
+     */
+    std::map<std::string, std::string> getMetadata();
+
 private:
 
     // Singelton instance of this class.
@@ -169,6 +205,8 @@ private:
     DBADDR caPutJsonLogPV;
     DBADDR *pCaPutJsonLogPV;
 
+    // IOC metadata
+    std::map<std::string, std::string> metadata;
 
     // Class methods (Do not allow public constructors - class is designed as singleton)
     CaPutJsonLogTask();
