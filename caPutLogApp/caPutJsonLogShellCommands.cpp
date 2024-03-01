@@ -11,11 +11,18 @@
  * - Initial version
 */
 
+#include <stdio.h>
 #include <errlog.h>
 #include <iocsh.h>
 #include <epicsExport.h>
 
 #include "caPutJsonLogTask.h"
+
+// Use colored ERROR/WARNING text if available
+#ifndef ERL_ERROR
+#  define ERL_ERROR "ERROR"
+#  define ERL_WARNING "WARNING"
+#endif
 
 /* EPICS iocsh shell commands */
 extern "C"
@@ -35,7 +42,7 @@ extern "C"
         &caPutJsonLogInitArg0,
         &caPutJsonLogInitArg1
     };
-    static const iocshFuncDef caPutjsonLogInitDef = {"caPutJsonLogInit", 2, caPutJsonLogInitArgs};
+    static const iocshFuncDef caPutJsonLogInitDef = {"caPutJsonLogInit", 2, caPutJsonLogInitArgs};
     static void caPutJsonLogInitCall(const iocshArgBuf *args)
     {
         caPutJsonLogInit(args[0].sval, static_cast<caPutJsonLogConfig>(args[1].ival));
@@ -76,17 +83,46 @@ extern "C"
         caPutJsonLogShow(args[0].ival);
     }
 
+    /* Error message if caPutLogInit used */
+    static const iocshFuncDef caPutLogInitDef = {"caPutLogInit", 0, NULL};
+    static void caPutLogInitCall(const iocshArgBuf *args)
+    {
+        fprintf(stderr, ERL_ERROR
+            ": The caPutLog module is configured for JSON put-logging,\n"
+            "  only caPutJsonLog* commands are available. To use the plain\n"
+            "  put-log format rebuild this IOC with 'caPutLog.dbd' instead\n"
+            "  of 'caPutJsonLog.dbd'.\n");
+        #ifdef IOCSHFUNCDEF_HAS_USAGE
+            iocshSetError(-1);
+        #endif
+    }
 
-    /* Register IOCsh commands */
+    /* Register JSON IOCsh commands */
     static void caPutJsonLogRegister(void)
     {
-        static int done = FALSE;
-        if(done) return;
-        done = TRUE;
+        extern int caPutLogRegisterDone;
 
-        iocshRegister(&caPutjsonLogInitDef,caPutJsonLogInitCall);
-        iocshRegister(&caPutJsonLogReconfDef,caPutJsonLogReconfCall);
-        iocshRegister(&caPutJsonLogShowDef,caPutJsonLogShowCall);
+        switch (caPutLogRegisterDone) {
+        case 0:
+            iocshRegister(&caPutJsonLogInitDef,caPutJsonLogInitCall);
+            iocshRegister(&caPutJsonLogReconfDef,caPutJsonLogReconfCall);
+            iocshRegister(&caPutJsonLogShowDef,caPutJsonLogShowCall);
+            iocshRegister(&caPutLogInitDef,caPutLogInitCall);
+            caPutLogRegisterDone = 2;
+            break;
+
+        case 1:
+            errlogPrintf(ERL_WARNING
+                ": Registration of caPutJsonLog commands skipped, as\n"
+                "  the caPutLog commands have already been registered.\n"
+                "  This IOC may have been built with both 'caPutJsonLog.dbd'\n"
+                "  and 'caPutLog.dbd', please rebuild it using only one.\n");
+            break;
+
+        case 2:
+            // Second registration, no problem
+            break;
+        }
     }
     epicsExportRegistrar(caPutJsonLogRegister);
 

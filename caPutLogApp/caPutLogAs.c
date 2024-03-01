@@ -62,6 +62,8 @@
 #include "caPutLogTask.h"
 #include "caPutLogAs.h"
 
+int caPutLogRegisterDone = 0;
+
 static asTrapWriteId listenerId = 0;
 
 static void *logDataFreeList = 0;
