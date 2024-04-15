@@ -8,28 +8,49 @@ on:
     branches:
       - '**'
 
+env:
+  SETUP_PATH: .ci
+
 jobs:
   build:
+    name: ${{ matrix.os }}/${{ matrix.base }}/${{ matrix.cmp }}/${{ matrix.configuration }}
+    runs-on: ${{ matrix.os}}
+    env:
+      CMP: ${{ matrix.cmp }}
+      BCFG: ${{ matrix.configuration }}
+      BASE: ${{ matrix.base }}
 
-    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            cmp: gcc
+            configuration: default
+            base: "7.0"
 
     steps:
     - uses: actions/checkout@v3
-    - name: Setup build tools
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install curl make patch m4 build-essential tclx python3-dev git
-    - name: Setup & build EPICS base
-      run: |
-        mkdir epics && cd epics
-        curl https://epics-controls.org/download/base/base-7.0.7.tar.gz | tar xz
-        cd base-7.0.7
-        make
-    - name: Build caPutLog
-      run: |
-        echo "EPICS_BASE=$GITHUB_WORKSPACE/epics/base-7.0.7" >> configure/RELEASE.local
-        make
-    - name: Run tests
-      run:  |
-        cd test/O.linux-x86_64/
-        ./caPutJsonLogTest
+      with:
+        submodules: true
+
+    - name: Prepare and compile EPICS dependencies
+      run: python .ci/cue.py prepare
+
+    - name: Build main module
+      run: python .ci/cue.py build
+
+    - name: Run main module tests
+      run: python .ci/cue.py -T 20M test
+
+    - name: Upload tapfiles Artifact
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: tapfiles ${{ matrix.name }}
+        path: "**/O.*/*.tap"
+        if-no-files-found: ignore
+
+    - name: Collect and show test results
+      if: ${{ always() }}
+      run: python .ci/cue.py -T 5M test-results
