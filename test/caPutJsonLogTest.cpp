@@ -23,6 +23,7 @@
 #include <osiSock.h>
 #include <envDefs.h>
 #include <errlog.h>
+#include <epicsString.h>
 #include <db_access.h>
 #include <db_access_routines.h>
 #include <dbUnitTest.h>
@@ -480,7 +481,9 @@ void commonTests(JsonParser &jsonParser, const char* pvname, const char * testPr
     // Test hostname
     char hostname[1024];
     gethostname(hostname, 1024);
-    testOk(!jsonParser.host.compare(hostname),
+
+    // asLibRoutines changes the hostnames to lower-case; some OSs are not so kind.
+    testOk(!epicsStrCaseCmp(hostname, jsonParser.host.c_str()),
             "%s - %s", testPrefix, "Hostname check");
 
     // Test username

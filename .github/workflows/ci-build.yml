@@ -43,6 +43,10 @@ jobs:
             cross: "RTEMS-pc386-qemu@4.10"
             test: NO
 
+          - os: macos-12
+            cmp: clang
+            configuration: default
+
     steps:
     - uses: actions/checkout@v3
       with:
