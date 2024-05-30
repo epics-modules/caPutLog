@@ -55,6 +55,7 @@
 #include <errlog.h>
 #include <asLib.h>
 #include <epicsAssert.h>
+#include <epicsAtomic.h>
 
 #include <epicsExport.h>
 #include "caPutLog.h"
@@ -111,6 +112,8 @@ static volatile int caPutLogConfig;
 
 int caPutLogDebug = 0;
 epicsExportAddress(int, caPutLogDebug);
+
+int caPutLogTotalCount = 0;
 
 #define MAX_MSGS 1000                   /* The length of queue (in messages) */
 #define MSG_SIZE sizeof(LOGDATA*)       /* We store only pointers */
@@ -184,6 +187,7 @@ void caPutLogTaskShow(void)
         default: state = "invalid";
     }
     printf("caPutLog mode: %d = %s\n", caPutLogConfig, state);
+    printf("caPutLog Total Count: %d\n", epicsAtomicGetIntT(&caPutLogTotalCount));
 }
 
 void caPutLogTaskStop(void)
@@ -220,9 +224,11 @@ void caPutLogSetTimeFmt (const char *format)
 
 static void caPutLogTask(void *arg)
 {
-    int sent = FALSE, burst = FALSE;
+    int sent = FALSE;
+    int burst = 0;
     int config;
     int msg_size;
+
     LOGDATA *pcurrent, *pnext;
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
@@ -257,7 +263,7 @@ static void caPutLogTask(void *arg)
                 log_msg(pold, pcurrent, burst, pmin, pmax, config);
                 val_assign(pold, &pcurrent->new_value.value, pcurrent->type);
                 sent = TRUE;
-                burst = FALSE;
+                burst = 0;
             }
         }
         else if (msg_size != MSG_SIZE) {
@@ -270,9 +276,10 @@ static void caPutLogTask(void *arg)
             }
 
             /* current and next are same pv */
-
             caPutLogDataFree(pcurrent);
             pcurrent = pnext;
+
+            epicsAtomicIncrIntT(&caPutLogTotalCount);
 
             if (sent) {
                 /* Set new initial max & min values */
@@ -280,11 +287,11 @@ static void caPutLogTask(void *arg)
                 val_assign(pmin, &pcurrent->new_value.value, pcurrent->type);
 
                 sent = FALSE;
-                burst = FALSE;   /* First message after logging */
+                burst = 0;   /* First message after logging */
             }
             else {              /* Next put of multiple puts */
                 if (isDbrNumeric(pcurrent->type)) {
-                    burst = TRUE;
+                    burst++;
                     val_max(pmax, &pcurrent->new_value.value, pmax, pcurrent->type);
                     val_min(pmin, &pcurrent->new_value.value, pmin, pcurrent->type);
                 }
@@ -305,6 +312,8 @@ static void caPutLogTask(void *arg)
             caPutLogDataFree(pcurrent);
             pcurrent = pnext;
 
+            epicsAtomicIncrIntT(&caPutLogTotalCount);
+
             /* Set new old_value */
             val_assign(pold, &pcurrent->old_value, pcurrent->type);
 
@@ -313,7 +322,7 @@ static void caPutLogTask(void *arg)
             val_assign(pmin, &pcurrent->new_value.value, pcurrent->type);
 
             sent = FALSE;
-            burst = FALSE;
+            burst = 0;
         }
     }
     errlogSevPrintf(errlogInfo, "caPutLog: log task exiting\n");
@@ -396,6 +405,10 @@ static void log_msg(const VALUE *pold_value, const LOGDATA *pLogData,
         len += epicsSnprintf(msg+len, space-len, " max=");
         if (len >= space) { do_log(msg, space-1, YES); return; }
         len += val_to_string(msg+len, space-len, pmax, pLogData->type);
+        if (len >= space) { do_log(msg, space-1, YES); return; }
+
+        /* burst count */
+        len += epicsSnprintf(msg+len, space-len, " burst=%d", burst);
         if (len >= space) { do_log(msg, space-1, YES); return; }
     }
     do_log(msg, len, NO);
