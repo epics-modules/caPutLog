@@ -441,11 +441,6 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     unsigned char interBuffer[interBufferSize];
     yajl_gen_status status;
 
-    // Dont log if logging is disabled
-    if (this->config == caPutJsonLogNone) {
-        return caPutJsonLogSuccess;
-    }
-
     // Dont log duplicate values if configured so
     if (this->config == caPutJsonLogOnChange && !burst) {
         if (this->compareValue(&pLogData->old_value, &pLogData->new_value.value, pLogData->type))
