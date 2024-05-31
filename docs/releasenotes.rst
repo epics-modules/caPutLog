@@ -8,6 +8,11 @@ R4-1: Changes since R4-0
 
 * Prevent crashes by only allowing one set of commands to be registered.
 
+* Fix an issue where waveform-type arrays would not send out monitors in certain
+  cases. See https://epics.anl.gov/tech-talk/2024/msg00481.php and 
+  https://github.com/epics-base/pva2pva/issues/60 for examples.
+
+
 R4-0: Changes since R3-7
 ------------------------
 
