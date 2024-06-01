@@ -1,0 +1,74 @@
+name: caPutLog CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+env:
+  SETUP_PATH: .ci
+
+jobs:
+  build:
+    name: ${{ matrix.os }}/${{ matrix.cmp }}/${{ matrix.configuration }}/${{ matrix.cross }}
+    runs-on: ${{ matrix.os}}
+    env:
+      CMP: ${{ matrix.cmp }}
+      BCFG: ${{ matrix.configuration }}
+      CI_CROSS_TARGETS: ${{ matrix.cross }}
+      TEST: ${{ matrix.test }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            cmp: gcc
+            configuration: default
+
+          - os: ubuntu-latest
+            cmp: gcc
+            configuration: static
+
+          - os: windows-2019
+            cmp: vs2019
+            configuration: static
+
+          - os: ubuntu-latest
+            cmp: gcc
+            configuration: default
+            cross: "RTEMS-pc386-qemu@4.10"
+            test: NO
+
+          - os: macos-12
+            cmp: clang
+            configuration: default
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Prepare and compile EPICS dependencies
+      run: python .ci/cue.py prepare
+
+    - name: Build main module
+      run: python .ci/cue.py build
+
+    - name: Run main module tests
+      run: python .ci/cue.py -T 20M test
+
+    - name: Upload tapfiles Artifact
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: tapfiles ${{ matrix.name }}
+        path: "**/O.*/*.tap"
+        if-no-files-found: ignore
+
+    - name: Collect and show test results
+      if: ${{ always() }}
+      run: python .ci/cue.py -T 5M test-results

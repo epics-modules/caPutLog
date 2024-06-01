@@ -13,8 +13,10 @@
 
 // Standard library imports
 #include <algorithm>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iterator>
 #include <string>
 
 #ifdef _WIN32
@@ -114,6 +116,42 @@ caPutJsonLogStatus CaPutJsonLogTask::report(int level)
         errlogSevPrintf(errlogMinor, "caPutJsonLog: no clients initialised\n");
         return caPutJsonLogError;
     }
+}
+
+caPutJsonLogStatus CaPutJsonLogTask::addMetadata(std::string property, std::string value)
+{
+    std::pair<std::map<std::string, std::string>::iterator, bool> ret;
+    ret = metadata.insert(std::pair<std::string, std::string>(property,value));
+    if ( ret.second == false ) {
+        metadata.erase(property);
+        ret = metadata.insert(std::pair<std::string, std::string>(property,value));
+        if (ret.second == false) {
+            errlogSevPrintf(errlogMinor, "caPutJsonLog: fail to add property %s to json log\n", property.c_str());
+            return caPutJsonLogError;
+        }
+    }
+    errlogSevPrintf(errlogInfo, "caPutJsonLog: add property %s with value %s to json log\n", property.c_str(), value.c_str());
+    return caPutJsonLogSuccess;
+}
+
+bool CaPutJsonLogTask::isMetadataKey(std::string property)
+{
+    return metadata.count(property) > 0;
+}
+
+void CaPutJsonLogTask::removeAllMetadata()
+{
+    metadata.clear();
+}
+
+size_t CaPutJsonLogTask::metadataCount()
+{
+    return metadata.size();
+}
+
+std::map<std::string, std::string> CaPutJsonLogTask::getMetadata()
+{
+    return metadata;
 }
 
 caPutJsonLogStatus CaPutJsonLogTask::initialize(const char* addresslist, caPutJsonLogConfig config)
@@ -446,6 +484,17 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle,
                             reinterpret_cast<const unsigned char *>(pLogData->userid),
                             strlen(pLogData->userid)));
+
+    // Add metadata
+    std::map<std::string, std::string>::iterator meta_it;
+    for(meta_it = metadata.begin(); meta_it != metadata.end(); meta_it++){
+            CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle,
+                            reinterpret_cast<const unsigned char *>(meta_it->first.c_str()),
+                            meta_it->first.length()));
+            CALL_YAJL_FUNCTION_AND_CHECK_STATUS(status, yajl_gen_string(handle,
+                            reinterpret_cast<const unsigned char *>(meta_it->second.c_str()),
+                            meta_it->second.length()));
+    }
 
     // Add PV name
     const unsigned char str_pvName[] = "pv";
