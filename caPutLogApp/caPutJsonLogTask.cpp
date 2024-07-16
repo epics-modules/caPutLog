@@ -88,7 +88,7 @@ CaPutJsonLogTask::~CaPutJsonLogTask()
     }
 }
 
-caPutJsonLogStatus CaPutJsonLogTask::reconfigure(caPutJsonLogConfig config)
+caPutJsonLogStatus CaPutJsonLogTask::reconfigure(caPutJsonLogConfig config, double timeout)
 {
     if ((config < caPutJsonLogNone)
         || (config > caPutJsonLogAllNoFilter)) {
@@ -97,6 +97,9 @@ caPutJsonLogStatus CaPutJsonLogTask::reconfigure(caPutJsonLogConfig config)
     } else {
         epics::atomic::set(this->config, config);
     }
+
+    this->setBurstTimeout(timeout);
+
     return caPutJsonLogSuccess;
 }
 
@@ -151,12 +154,12 @@ const std::map<std::string, std::string>& CaPutJsonLogTask::getMetadata()
     return metadata;
 }
 
-caPutJsonLogStatus CaPutJsonLogTask::initialize(const char* addresslist, caPutJsonLogConfig config)
+caPutJsonLogStatus CaPutJsonLogTask::initialize(const char* addresslist, caPutJsonLogConfig config, double timeout)
 {
     caPutJsonLogStatus status;
 
     // Store passed configuration parameters
-    this->reconfigure(config);
+    this->reconfigure(config, timeout);
 
     // Check if user enabled the logger
     if (config == caPutJsonLogNone) {
@@ -278,6 +281,16 @@ caPutJsonLogStatus CaPutJsonLogTask::configureServerLogging(const char* address)
     return caPutJsonLogSuccess;
 }
 
+caPutJsonLogStatus CaPutJsonLogTask::setBurstTimeout( double timeout )
+{
+    if (timeout > 0.0) {
+        this->burstTimeout = timeout;
+    } else {
+        this->burstTimeout = default_burst_timeout;
+    }
+    return caPutJsonLogSuccess;
+}
+
 caPutJsonLogStatus CaPutJsonLogTask::configurePvLogging()
 {
     char *caPutJsonLogPVEnv;
@@ -331,7 +344,7 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
         int msgSize;
 
         // Receive new put with timeout
-        msgSize = this->caPutJsonLogQ.receive(&pnext, sizeof(LOGDATA *), 5.0);
+        msgSize = this->caPutJsonLogQ.receive(&pnext, sizeof(LOGDATA *), this->burstTimeout);
 
         /* Timeout */
         if (msgSize == -1) {

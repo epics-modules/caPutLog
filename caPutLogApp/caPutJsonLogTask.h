@@ -79,6 +79,9 @@ public:
     // Default port to be used if not specified by the user
     static const int default_port = 7011;
 
+    // Default burst filter timeout if not specified by the user
+    static constexpr double default_burst_timeout = DEFAULT_BURST_TIMEOUT;
+
     /**
      * @brief Get the singleton Instance object.
      *
@@ -91,10 +94,11 @@ public:
      *
      * @param address IP address or hostname of the log server. Can include a port number after a colon,
      *           if port number is not specified, default value will be used.
-     * @param config Configuration paramteter. Valid value are -1 <= config <= 2.
+     * @param config Configuration parameter. Valid value are -1 <= config <= 2.
+     * @param timeout Burst filter timeout parameter.
      * @return caPutJsonLogStatus Status code.
      */
-    caPutJsonLogStatus initialize(const char* address, caPutJsonLogConfig config);
+    caPutJsonLogStatus initialize(const char* address, caPutJsonLogConfig config, double timeout);
 
     /**
      * @brief Add a put details packed as a ::LOGDATA structure to a queue for processing.
@@ -131,9 +135,10 @@ public:
      *
      * @param config New configuration. Valid value are -1 <= config <= 2. Invalid
      * value will default to 1 "caPutJsonLogAll".
+     * @param timeout New burst filter timeout value
      * @return int Status code.
      */
-    caPutJsonLogStatus reconfigure(caPutJsonLogConfig config);
+    caPutJsonLogStatus reconfigure(caPutJsonLogConfig config, double timeout);
 
     /**
      * @brief Print report client logger information to the console.
@@ -178,6 +183,14 @@ public:
      */
     const std::map<std::string, std::string>& getMetadata();
 
+    /**
+     * @brief Change the burst filter timeout
+     *
+     * @param timeout Time between puts to the same PV that will be considered a burst
+     * @return int Status code.
+     */
+    caPutJsonLogStatus setBurstTimeout(double timeout);
+
 private:
 
     // Singleton instance of this class.
@@ -185,6 +198,8 @@ private:
 
     // Logger configuration
     int config; // To modify or read this value only epicsAtomic methods should be used
+
+    double burstTimeout;
 
     // Interthread communication
     epicsMessageQueue caPutJsonLogQ;

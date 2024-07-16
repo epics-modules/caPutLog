@@ -266,10 +266,8 @@ static void caPutLogTask(void *arg)
 
     while (caPutLogConfig != caPutLogNone) {                 /* Main Server Loop */
 
-        timeout = burstTimeout;
-
         /* Receive next message */
-        msg_size = epicsMessageQueueReceiveWithTimeout(caPutLogQ, &pnext, MSG_SIZE, timeout);
+        msg_size = epicsMessageQueueReceiveWithTimeout(caPutLogQ, &pnext, MSG_SIZE, burstTimeout);
         config = caPutLogConfig;
 
         if (msg_size == -1) {   /* timeout */
