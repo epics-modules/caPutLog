@@ -443,7 +443,7 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
 
     // Dont log duplicate values if configured so
     if (this->config == caPutJsonLogOnChange && !burst) {
-        if (this->compareValue(&pLogData->old_value, &pLogData->new_value.value, pLogData->type))
+        if (this->compareValues(pLogData))
             return caPutJsonLogSuccess;
     }
 
@@ -779,34 +779,46 @@ void CaPutJsonLogTask::calculateMax(VALUE *pres, const VALUE *pa, const VALUE *p
     }
 }
 
-bool CaPutJsonLogTask::compareValue(const VALUE *pa, const VALUE *pb, short type)
-{
-    switch (type) {
-        case DBR_CHAR:
-            return (pa->v_int8 == pb->v_int8);
-        case DBR_UCHAR:
-            return (pa->v_uint8 == pb->v_uint8);
-        case DBR_SHORT:
-            return (pa->v_int16 == pb->v_int16);
-        case DBR_USHORT:
-        case DBR_ENUM:
-            return (pa->v_uint16 == pb->v_uint16);
-        case DBR_LONG:
-            return (pa->v_int32 == pb->v_int32);
-        case DBR_ULONG:
-            return (pa->v_uint32 == pb->v_uint32);
-        case DBR_INT64:
-            return (pa->v_int64 == pb->v_int64);
-        case DBR_UINT64:
-            return (pa->v_uint64 == pb->v_uint64);
-        case DBR_FLOAT:
-            return (pa->v_float == pb->v_float);
-        case DBR_DOUBLE:
-            return (pa->v_double == pb->v_double);
-        case DBR_STRING:
-            return (0 == strcmp(pa->v_string, pb->v_string));
-        default:
-            return 0;
+#define SINGLE_TYPE_COMPARE(_t, _s)                            \
+    if (pLogData->is_array)                                    \
+        return memcmp(pa->a_##_t, pb->a_##_t, size * _s) == 0; \
+    return pa->v_##_t == pb->v_##_t;
+
+bool CaPutJsonLogTask::compareValues(const LOGDATA *pLogData) {
+    const VALUE *pa = &pLogData->old_value;
+    const VALUE *pb = &pLogData->new_value.value;
+    const int size = pLogData->old_log_size;
+
+    if (pLogData->is_array && pLogData->old_log_size != pLogData->new_log_size)
+        return false;
+
+    switch (pLogData->type)
+    {
+    case DBR_CHAR:
+        SINGLE_TYPE_COMPARE(int8, sizeof(epicsInt8));
+    case DBR_UCHAR:
+        SINGLE_TYPE_COMPARE(uint8, sizeof(epicsUInt8));
+    case DBR_SHORT:
+        SINGLE_TYPE_COMPARE(int16, sizeof(epicsInt16));
+    case DBR_USHORT:
+    case DBR_ENUM:
+        SINGLE_TYPE_COMPARE(uint16, sizeof(epicsUInt16));
+    case DBR_LONG:
+        SINGLE_TYPE_COMPARE(int32, sizeof(epicsInt32));
+    case DBR_ULONG:
+        SINGLE_TYPE_COMPARE(uint32, sizeof(epicsUInt32));
+    case DBR_INT64:
+        SINGLE_TYPE_COMPARE(int64, sizeof(epicsInt64));
+    case DBR_UINT64:
+        SINGLE_TYPE_COMPARE(uint64, sizeof(epicsUInt64));
+    case DBR_FLOAT:
+        SINGLE_TYPE_COMPARE(float, sizeof(epicsFloat32));
+    case DBR_DOUBLE:
+        SINGLE_TYPE_COMPARE(double, sizeof(epicsFloat64));
+    case DBR_STRING:
+        SINGLE_TYPE_COMPARE(string, MAX_STRING_SIZE);
+    default:
+        return 0;
     }
 }
 
