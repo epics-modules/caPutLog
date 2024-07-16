@@ -8,7 +8,6 @@ include $(TOP)/configure/CONFIG
 DBDDEPENDS_FILES += dbTestIoc.dbd$(DEP)
 TARGETS += $(COMMON_DIR)/dbTestIoc.dbd
 dbTestIoc_DBD += base.dbd
-CXXFLAGS=-std=c++11
 
 # Libraries to which the test executable is linked
 PROD_LIBS = caPutLog

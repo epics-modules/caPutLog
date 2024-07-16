@@ -15,6 +15,7 @@
 #include <vector>
 #include <sstream>
 #include <string>
+#include <map>
 #include <cstring>
 #include <algorithm>
 
@@ -855,36 +856,41 @@ void runTests(void *arg) {
 
 
     // Test metadata
-    std::map<std::string, std::string> metadata_test_single = {
-        {"ABCDEFGHIJKLMNOPQRS", "1234567890_1234567890"}
-    };
-    std::map<std::string, std::string> metadata_test_escape_chars = {
-        {"ABC\n##&¤67&nbsp; space&#160&&#160;\'\\n#", "CBC\n##&¤67&nbsp; space&#160&&#160;\'\\n#"}
-    };
-    std::map<std::string, std::string> metadata_test_multiple = {
-        {"One", "1"}, {"Two", "2"}, {"Three", "3"}, {"Four", "4"}, {"Five", "5"},
-        {"Six", "6"}, {"Seven", "7"}, {"Eight", "8"}, {"Nine", "9"}, {"Ten", "10"},
-    };
-
-    std::map<std::string, std::string> metadata_test_reinsert_new_val = {
-        {"Five", "5"}, {"Six", "6"},
-    };
-
+    std::map<std::string, std::string> metadata_test_single;
+    metadata_test_single["ABCDEFGHIJKLMNOPQRS"] = "1234567890_1234567890";
     testMetadataHelper(metadata_test_single);
+
+    std::map<std::string, std::string> metadata_test_escape_chars;
+    metadata_test_escape_chars["ABC\n##&¤67&nbsp; space&#160&&#160;\'\\n#"] =
+        "CBC\n##&¤67&nbsp; space&#160&&#160;\'\\n#";
     testMetadataHelper(metadata_test_escape_chars);
+
+    std::map<std::string, std::string> metadata_test_multiple;
+    metadata_test_multiple["One"] = "1";
+    metadata_test_multiple["Two"] = "2";
+    metadata_test_multiple["Three"] = "3";
+    metadata_test_multiple["Four"] = "4";
+    metadata_test_multiple["Five"] = "5";
+    metadata_test_multiple["Six"] = "6";
+    metadata_test_multiple["Seven"] = "7";
+    metadata_test_multiple["Eight"] = "8";
+    metadata_test_multiple["Nine"] = "9";
+    metadata_test_multiple["Ten"] = "10";
     testMetadataHelper(metadata_test_multiple);
 
     //Reinsert metadata test
+    std::map<std::string, std::string> metadata_test_reinsert_new_val;
+    metadata_test_reinsert_new_val["Five"] = "5";
+    metadata_test_reinsert_new_val["Six"] = "6";
+
     logger->addMetadata("Five", "Five");
     logger->addMetadata("Six", "Six");
     testMetadataHelper(metadata_test_reinsert_new_val);
 
     // 1000+ elements in metadata
     std::map<std::string, std::string> metadata_test_big;
-    for(int i = 0; i <=100; i++)
-    {
-        metadata_test_big.insert(std::pair<std::string, std::string>(std::to_string(i), std::to_string(i)));
-    }
+    for (int i = 0; i <=100; i++)
+        metadata_test_big[std::to_string(i)] = std::to_string(i);
     testMetadataHelper(metadata_test_big);
 
     //Destroy test thread CA context
