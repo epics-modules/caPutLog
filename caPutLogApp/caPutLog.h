@@ -17,10 +17,11 @@ extern "C" {
 #define caPutLogAll         1   /* log all puts */
 #define caPutLogAllNoFilter 2   /* log all puts no filtering on same PV*/
 
-epicsShareFunc int caPutLogInit (const char *addr_str, int config);
-epicsShareFunc int caPutLogReconf (int config);
+epicsShareFunc int caPutLogInit (const char *addr_str, int config, double timeout);
+epicsShareFunc int caPutLogReconf (int config, double timeout);
 epicsShareFunc void caPutLogShow (int level);
 epicsShareFunc void caPutLogSetTimeFmt (const char *format);
+epicsShareFunc void caPutLogSetBurstTimeout (double timeout);
 
 #ifdef __cplusplus
 }

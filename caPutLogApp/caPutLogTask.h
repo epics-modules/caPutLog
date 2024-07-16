@@ -18,6 +18,8 @@ extern "C" {
 #define MAX_ARRAY_SIZE_BYTES 0
 #endif
 
+#define DEFAULT_BURST_TIMEOUT 5.0
+
 typedef union {
     epicsInt8       v_int8;
     epicsUInt8      v_uint8;
@@ -66,7 +68,7 @@ typedef struct {
     int new_log_size;
 } LOGDATA;
 
-epicsShareFunc int caPutLogTaskStart(int config);
+epicsShareFunc int caPutLogTaskStart(int config, double timeout);
 epicsShareFunc void caPutLogTaskStop(void);
 epicsShareFunc void caPutLogTaskSend(LOGDATA *plogData);
 epicsShareFunc void caPutLogTaskShow(void);

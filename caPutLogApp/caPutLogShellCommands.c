@@ -15,24 +15,28 @@
 
 static const iocshArg caPutLogInitArg0 = {"address", iocshArgString};
 static const iocshArg caPutLogInitArg1 = {"config", iocshArgInt};
+static const iocshArg caPutLogInitArg2 = {"burst timeout", iocshArgDouble};
 static const iocshArg *const caPutLogInitArgs[] = {
     &caPutLogInitArg0,
-    &caPutLogInitArg1
+    &caPutLogInitArg1,
+    &caPutLogInitArg2
 };
-static const iocshFuncDef caPutLogInitDef = {"caPutLogInit", 2, caPutLogInitArgs};
+static const iocshFuncDef caPutLogInitDef = {"caPutLogInit", 3, caPutLogInitArgs};
 static void caPutLogInitCall(const iocshArgBuf *args)
 {
-    caPutLogInit(args[0].sval, args[1].ival);
+    caPutLogInit(args[0].sval, args[1].ival, args[2].dval);
 }
 
 static const iocshArg caPutLogReconfArg0 = {"config", iocshArgInt};
+static const iocshArg caPutLogReconfArg1 = {"burst timeout", iocshArgDouble};
 static const iocshArg *const caPutLogReconfArgs[] = {
-    &caPutLogReconfArg0
+    &caPutLogReconfArg0,
+    &caPutLogReconfArg1
 };
-static const iocshFuncDef caPutLogReconfDef = {"caPutLogReconf", 1, caPutLogReconfArgs};
+static const iocshFuncDef caPutLogReconfDef = {"caPutLogReconf", 2, caPutLogReconfArgs};
 static void caPutLogReconfCall(const iocshArgBuf *args)
 {
-    caPutLogReconf(args[0].ival);
+    caPutLogReconf(args[0].ival, args[1].dval);
 }
 
 static const iocshArg caPutLogShowArg0 = {"level", iocshArgInt};
@@ -69,6 +73,16 @@ static void caPutJsonLogInitCall(const iocshArgBuf *args)
     #endif
 }
 
+static const iocshArg caPutLogSetBurstTimeoutArg0 = {"burst timeout", iocshArgDouble};
+static const iocshArg *const caPutLogSetBurstTimeoutArgs[] = {
+    &caPutLogSetBurstTimeoutArg0
+};
+static const iocshFuncDef caPutLogSetBurstTimeoutDef = {"caPutLogSetBurstTimeout", 1, caPutLogSetBurstTimeoutArgs};
+static void caPutLogSetBurstTimeoutCall(const iocshArgBuf *args)
+{
+    caPutLogSetBurstTimeout(args[0].dval);
+}
+
 static void caPutLogRegister(void)
 {
     extern int caPutLogRegisterDone;
@@ -80,6 +94,7 @@ static void caPutLogRegister(void)
         iocshRegister(&caPutLogShowDef,caPutLogShowCall);
         iocshRegister(&caPutLogSetTimeFmtDef,caPutLogSetTimeFmtCall);
         iocshRegister(&caPutJsonLogInitDef,caPutJsonLogInitCall);
+        iocshRegister(&caPutLogSetBurstTimeoutDef,caPutLogSetBurstTimeoutCall);
         caPutLogRegisterDone = 1;
         break;
 

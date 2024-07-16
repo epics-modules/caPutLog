@@ -51,12 +51,12 @@ void caPutLogShow (int level)
 /*
  *  caPutLogReconf()
  */
-int caPutLogReconf (int config)
+int caPutLogReconf (int config, double timeout)
 {
     if (config < 0)
         caPutLogTaskStop();
     else
-        caPutLogTaskStart(config);
+        caPutLogTaskStart(config, timeout);
     caPutLogClientFlush();
     return caPutLogSuccess;
 }
@@ -69,7 +69,7 @@ static void caPutLogExitProc(void *arg)
 /*
  *  caPutLogInit()
  */
-int caPutLogInit (const char *addr_str, int config)
+int caPutLogInit (const char *addr_str, int config, double timeout)
 {
     int status;
 
@@ -96,7 +96,7 @@ int caPutLogInit (const char *addr_str, int config)
         return caPutLogError;
     }
 
-    status = caPutLogTaskStart(config);
+    status = caPutLogTaskStart(config, timeout);
     if (status) {
         return caPutLogError;
     }
