@@ -282,15 +282,13 @@ private:
     void calculateMax(VALUE *pres, const VALUE *pa, const VALUE *pb, short type);
 
     /**
-     * @brief Compare values in two ::VALUE structures if they are the same.
+     * @brief Compare values in a LOGDATA structure and see if they are the same
      *
-     * @param pa First ::VALUE structure to be compared.
-     * @param pb Second ::VALUE structure to be compared.
-     * @param type EPICS DRB_* type stored in the input structures.
+     * @param pLogData Pointer to log data containing values to compare
      * @return true If values are the same.
      * @return false  If values are not the same.
      */
-    bool compareValue(const VALUE *pa, const VALUE *pb, short type);
+    bool compareValues(const LOGDATA *pLogData);
 
     /**
      * @brief Get a string representation of the value stored in the ::VALUE.
