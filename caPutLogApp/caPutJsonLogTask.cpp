@@ -821,6 +821,7 @@ bool CaPutJsonLogTask::compareValues(const LOGDATA *pLogData) {
 
 int CaPutJsonLogTask::fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval, short type, int index)
 {
+    size_t len;
     switch (type) {
         case DBR_CHAR:
             return epicsSnprintf(pbuf, buflen, "%s", ((char *)pval));
@@ -836,9 +837,11 @@ int CaPutJsonLogTask::fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval,
         case DBR_ULONG:
             return epicsSnprintf(pbuf, buflen, "%u", ((epicsUInt32 *)pval)[index]);
         case DBR_FLOAT:
-            return epicsSnprintf(pbuf, buflen, "%g", ((epicsFloat32 *)pval)[index]);
+            len = epicsSnprintf(pbuf, buflen, "%.8g", ((epicsFloat32 *)pval)[index]);
+            break;
         case DBR_DOUBLE:
-            return epicsSnprintf(pbuf, buflen, "%g", ((epicsFloat64 *)pval)[index]);
+            len = epicsSnprintf(pbuf, buflen, "%.17g", ((epicsFloat64 *)pval)[index]);
+            break;
         case DBR_INT64:
             return epicsSnprintf(pbuf, buflen, "%lld", ((epicsInt64 *)pval)[index]);
         case DBR_UINT64:
@@ -850,6 +853,12 @@ int CaPutJsonLogTask::fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval,
                 "caPutJsonLog: failed to convert PV value to a string representation\n");
             return caPutJsonLogError;
     }
+    /* Append ".0" to Floats with no decimals to indicate the type */
+    if (len > 0 && strspn(pbuf, "0123456789-") == len && len < buflen - 2) {
+        strcpy(pbuf+len, ".0");
+        len += 2;
+    }
+    return len;
 }
 
 specialValues CaPutJsonLogTask::testForSpecialValues(const VALUE *pval, short type, int index) {
