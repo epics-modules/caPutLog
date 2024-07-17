@@ -149,7 +149,7 @@ public:
      * @param property JSON property
      * @param value Value associated with property
      */
-    caPutJsonLogStatus addMetadata(std::string property, std::string value);
+    caPutJsonLogStatus addMetadata(const char *property, const char *value);
 
     /**
      * @brief Check if a property is a key in the metadata map

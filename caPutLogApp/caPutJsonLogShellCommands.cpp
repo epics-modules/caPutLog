@@ -99,12 +99,11 @@ extern "C"
     }
 
     /* Metadata */
-    int caPutJsonLogAddMetadata(char *property, char *value){
+    int caPutJsonLogAddMetadata(const char *property, const char *value) {
         CaPutJsonLogTask *logger = CaPutJsonLogTask::getInstance();
-        std::string property_str(property);
-        std::string value_str(value);
-        if (logger != NULL) return logger->addMetadata(property_str, value_str);
-        else return -1;
+        if (logger)
+            return logger->addMetadata(property, value);
+        return -1;
     }
     static const iocshArg caPutJsonLogAddMetadataArg0 = {"property", iocshArgString};
     static const iocshArg caPutJsonLogAddMetadataArg1 = {"value", iocshArgString};

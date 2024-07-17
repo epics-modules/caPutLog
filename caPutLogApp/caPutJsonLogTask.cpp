@@ -118,19 +118,16 @@ caPutJsonLogStatus CaPutJsonLogTask::report(int level)
     }
 }
 
-caPutJsonLogStatus CaPutJsonLogTask::addMetadata(std::string property, std::string value)
+caPutJsonLogStatus CaPutJsonLogTask::addMetadata(const char *property, const char *value)
 {
-    std::pair<std::map<std::string, std::string>::iterator, bool> ret;
-    ret = metadata.insert(std::pair<std::string, std::string>(property,value));
-    if ( ret.second == false ) {
-        metadata.erase(property);
-        ret = metadata.insert(std::pair<std::string, std::string>(property,value));
-        if (ret.second == false) {
-            errlogSevPrintf(errlogMinor, "caPutJsonLog: fail to add property %s to json log\n", property.c_str());
-            return caPutJsonLogError;
-        }
+    if (!property) {
+        errlogSevPrintf(errlogMinor, "caPutJsonLog: NULL key supplied\n");
+        return caPutJsonLogError;
     }
-    errlogSevPrintf(errlogInfo, "caPutJsonLog: add property %s with value %s to json log\n", property.c_str(), value.c_str());
+    if (!value) {
+        metadata.erase(property);
+    } else
+        metadata[property] = value;
     return caPutJsonLogSuccess;
 }
 
