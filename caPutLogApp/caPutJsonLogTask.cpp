@@ -146,7 +146,7 @@ size_t CaPutJsonLogTask::metadataCount()
     return metadata.size();
 }
 
-std::map<std::string, std::string> CaPutJsonLogTask::getMetadata()
+const std::map<std::string, std::string>& CaPutJsonLogTask::getMetadata()
 {
     return metadata;
 }

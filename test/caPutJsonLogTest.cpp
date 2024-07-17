@@ -388,13 +388,8 @@ public:
             }
         }
         else if (logger->isMetadataKey(jsonParser->currentKey)) {
-            std::pair<std::map<std::string, std::string>::iterator, bool> ret;
-            ret = jsonParser->metadata.insert(std::pair<std::string, std::string>(jsonParser->currentKey,
-                  std::string(reinterpret_cast<const char *>(stringVal), stringLen)));
-            if (ret.second == false) {
-                testAbort("caPutJsonLog: fail to add property %s to json log\n", jsonParser->currentKey.c_str());
-                return caPutJsonLogError;
-            }
+            jsonParser->metadata[jsonParser->currentKey] =
+                std::string(reinterpret_cast<const char *>(stringVal), stringLen);
             if (!jsonParser->inArray) {
                 jsonParser->waitingKey = true;
             }
@@ -721,18 +716,18 @@ void testDbf(const char *pv, chtype type,
     }
 }
 
-void testMetadataHelper(std::map<std::string, std::string> metadata )
+void testMetadataHelper(const std::map<std::string, std::string>& testdata)
 {
     char desc1[] = "Description 1";
     char desc2[] = "Description 2";
-    std::map<std::string, std::string>::iterator meta_it;
-    for(meta_it = metadata.begin(); meta_it != metadata.end(); meta_it++){
-        logger->addMetadata(meta_it->first,meta_it->second);
+    std::map<std::string, std::string>::const_iterator test_it;
+    for (test_it = testdata.begin(); test_it != testdata.end(); test_it++){
+        logger->addMetadata(test_it->first.c_str(), test_it->second.c_str());
     }
     testDbf<dbr_string_t>("longout_DBF_STRING.DESC", DBR_STRING, desc1, 1, desc2, 1, "Metadata test");
-    testOk(metadata_compare(metadata, logger->getMetadata()),
+    testOk(metadata_compare(testdata, logger->getMetadata()),
              "Metadata test - Metadata keys and values check - Original test(%lu) vs Logger(%lu)",
-             metadata.size(), logger->metadataCount());
+             testdata.size(), logger->metadataCount());
     logger->removeAllMetadata();
 }
 

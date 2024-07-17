@@ -176,7 +176,7 @@ public:
      *
      * @return map<string, string> the Metadata map
      */
-    std::map<std::string, std::string> getMetadata();
+    const std::map<std::string, std::string>& getMetadata();
 
 private:
 
