@@ -6,7 +6,23 @@ R4-1: Changes since R4-0
 
 **This version has not yet been released**
 
-* Prevent crashes by only allowing one set of commands to be registered.
+* Floating-point numbers are now logged with the precision appropriate to
+  their data type (8 or 17 digits), and have ".0" appended if no decimals are
+  output by the string conversion.
+
+* JSON logging now respects the configuration setting to log only puts where
+  the field value actually changes.
+
+* Sites can add their own JSON metadata to be included in the JSON log output
+  using the new ``caPutJsonLogAddMetadata`` command, which takes arguments for
+  key and value strings. Omitting the value string deletes that item.
+
+* The JSON output now includes a burst count for PVs that have changed several
+  times within in the burst interval. The logger also counts the total number
+  of puts seen, and displays that in its status reports.
+
+* Prevent crashes by only allowing either the original command set or the new
+  JSON commands to be registered with the IOC, not both.
 
 * Fix an issue where waveform-type arrays would not send out monitors in certain
   cases. See https://epics.anl.gov/tech-talk/2024/msg00481.php and 

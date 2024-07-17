@@ -9,3 +9,4 @@ html/
 include/
 lib/
 templates/
+/configure/*.local
