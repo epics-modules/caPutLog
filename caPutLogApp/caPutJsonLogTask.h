@@ -79,9 +79,6 @@ public:
     // Default port to be used if not specified by the user
     static const int default_port = 7011;
 
-    // Default burst filter timeout if not specified by the user
-    static constexpr double default_burst_timeout = DEFAULT_BURST_TIMEOUT;
-
     /**
      * @brief Get the singleton Instance object.
      *
