@@ -286,7 +286,7 @@ caPutJsonLogStatus CaPutJsonLogTask::setBurstTimeout( double timeout )
     if (timeout > 0.0) {
         this->burstTimeout = timeout;
     } else {
-        this->burstTimeout = default_burst_timeout;
+        this->burstTimeout = DEFAULT_BURST_TIMEOUT;
     }
     return caPutJsonLogSuccess;
 }
