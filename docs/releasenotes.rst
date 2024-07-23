@@ -28,6 +28,8 @@ R4-1: Changes since R4-0
   cases. See https://epics.anl.gov/tech-talk/2024/msg00481.php and 
   https://github.com/epics-base/pva2pva/issues/60 for examples.
 
+* Add a configurable timeout for burst filtering.
+
 
 R4-0: Changes since R3-7
 ------------------------

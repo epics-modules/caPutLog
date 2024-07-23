@@ -108,11 +108,11 @@ Configure the IOC
 In your IOC startup file add this command for logging using the original output
 format::
 
-   caPutLogInit "host[:port]" [config]
+   caPutLogInit "host[:port]" [config] [burst timeout]
 
 or for the JSON output format::
 
-   caPutJsonLogInit "host[:port]" [config]
+   caPutJsonLogInit "host[:port]" [config] [burst timeout]
 
 In both cases ``host`` is the IP address or host name of the log server and
 ``port`` is optional (the default is 7011).
@@ -133,6 +133,8 @@ The second (optional, default=0) argument should be one of:
 - ``1``  - Log all puts with a burst filter
 - ``2``  - Log all puts without any filters
 
+The third (optional, default=5.0s) argument is the ``burst timeout``; that is,
+it is the number of seconds to use for the burst filter.
 
 Access security must be enabled in the IOC by creating a suitable configuration
 file and loading it with a call to ``asSetFilename(<filename>)`` before
@@ -164,6 +166,9 @@ Other shell commands for controlling the logger are:
    setting and total number of logged puts. ``level`` is the usual interest
    level (0, 1, or 2).
 
+``caPutLogSetBurstTimeout timeout`` / ``caPutJsonLogSetBurstTimeout timeout``
+
+   Set the burst timeout to a new value ``timeout`` (given in seconds).
 
 Set up a Log Server
 +++++++++++++++++++
