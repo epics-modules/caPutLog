@@ -4,8 +4,6 @@ Release Notes
 R4-1: Changes since R4-0
 ------------------------
 
-**This version has not yet been released**
-
 * Floating-point numbers are now logged with the precision appropriate to
   their data type (8 or 17 digits), and have ".0" appended if no decimals are
   output by the string conversion.
