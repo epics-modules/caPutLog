@@ -346,6 +346,11 @@ void CaPutJsonLogTask::caPutJsonLogTask(void *arg)
         // Receive new put with timeout
         msgSize = this->caPutJsonLogQ.receive(&pnext, sizeof(LOGDATA *), this->burstTimeout);
 
+        // Do not log if configured as caPutJsonLogNone
+	if (epics::atomic::get(this->config) == caPutJsonLogNone){
+	    continue;
+	}
+
         /* Timeout */
         if (msgSize == -1) {
             // If we have have unsent message and timeout occurred, send the cached change
