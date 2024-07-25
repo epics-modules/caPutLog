@@ -8,8 +8,9 @@ R4-1: Changes since R4-0
   their data type (8 or 17 digits), and have ".0" appended if no decimals are
   output by the string conversion.
 
-* JSON logging now respects the configuration setting to log only puts where
-  the field value actually changes.
+* JSON logging now respects the configuration settings to log only puts where
+  the field value actually changes, and to disable logging. The latter doesn't
+  stop the puts from being queued by the IOC, but the values aren't sent out.
 
 * Sites can add their own JSON metadata to be included in the JSON log output
   using the new ``caPutJsonLogAddMetadata`` command, which takes arguments for
