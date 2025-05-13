@@ -240,7 +240,6 @@ static void caPutLogTask(void *arg)
     int burst = 0;
     int config;
     int msg_size;
-    double timeout;
     LOGDATA *pcurrent, *pnext;
     VALUE old_value, max_value, min_value;
     VALUE *pold=&old_value, *pmax=&max_value, *pmin=&min_value;
