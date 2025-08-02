@@ -22,6 +22,7 @@ epicsShareFunc int caPutLogReconf (int config, double timeout);
 epicsShareFunc void caPutLogShow (int level);
 epicsShareFunc void caPutLogSetTimeFmt (const char *format);
 epicsShareFunc void caPutLogSetBurstTimeout (double timeout);
+epicsShareFunc int caPutLogInitialized(void);
 
 #ifdef __cplusplus
 }

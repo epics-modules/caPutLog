@@ -36,6 +36,10 @@ static const iocshArg *const caPutLogReconfArgs[] = {
 static const iocshFuncDef caPutLogReconfDef = {"caPutLogReconf", 2, caPutLogReconfArgs};
 static void caPutLogReconfCall(const iocshArgBuf *args)
 {
+    if (!caPutLogInitialized()) {
+        printf("caPutLog not initialized\n");
+        return;
+    }
     caPutLogReconf(args[0].ival, args[1].dval);
 }
 
@@ -46,6 +50,10 @@ static const iocshArg *const caPutLogShowArgs[] = {
 static const iocshFuncDef caPutLogShowDef = {"caPutLogShow", 1, caPutLogShowArgs};
 static void caPutLogShowCall(const iocshArgBuf *args)
 {
+    if (!caPutLogInitialized()) {
+        printf("caPutLog not initialized\n");
+        return;
+    }
     caPutLogShow(args[0].ival);
 }
 
