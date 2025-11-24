@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 #define MAX_USERID_SIZE 32
-#define MAX_HOSTID_SIZE 32
+#define MAX_HOSTID_SIZE 256
 
 #if JSON_AND_ARRAYS_SUPPORTED
 #define MAX_ARRAY_SIZE_BYTES 400
