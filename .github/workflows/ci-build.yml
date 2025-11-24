@@ -13,8 +13,8 @@ env:
 
 jobs:
   build:
-    name: ${{ matrix.os }}/${{ matrix.cmp }}/${{ matrix.configuration }}/${{ matrix.cross }}
-    runs-on: ${{ matrix.os}}
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
     env:
       CMP: ${{ matrix.cmp }}
       BCFG: ${{ matrix.configuration }}
@@ -24,31 +24,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Job names also name artifacts, character limitations apply
         include:
           - os: ubuntu-latest
             cmp: gcc
             configuration: default
+            name: "Ub-24 default"
 
           - os: ubuntu-latest
             cmp: gcc
             configuration: static
+            name: "Ub-24 static"
 
-          - os: windows-2019
-            cmp: vs2019
+          - os: windows-2022
+            cmp: vs2022
             configuration: static
+            name: "Win-22 MSC-22 static"
 
           - os: ubuntu-latest
             cmp: gcc
             configuration: default
             cross: "RTEMS-pc386-qemu@4.10"
             test: NO
+            name: "Ub-24 gcc + RT-4.10"
 
-          - os: macos-12
+          - os: ubuntu-latest
+            cmp: gcc
+            configuration: default
+            cross: "RTEMS-pc686-qemu@5"
+            name: "Ub-24 gcc + RT-5.1 pc686"
+
+          - os: macos-latest
             cmp: clang
             configuration: default
+            name: "MacOS clang"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
