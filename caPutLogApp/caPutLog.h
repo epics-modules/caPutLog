@@ -17,6 +17,9 @@ extern "C" {
 #define caPutLogAll         1   /* log all puts */
 #define caPutLogAllNoFilter 2   /* log all puts no filtering on same PV*/
 
+/* Make API change in R4.1 detectable */
+#define HAS_caPutLogInit_arg3timeout
+
 epicsShareFunc int caPutLogInit (const char *addr_str, int config, double timeout);
 epicsShareFunc int caPutLogReconf (int config, double timeout);
 epicsShareFunc void caPutLogShow (int level);
