@@ -455,24 +455,28 @@ void commonTests(JsonParser &jsonParser, const char* pvname, const char * testPr
 
     // Test if is Json terminated with newline
     testOk(*jsonParser.jsonLogMsg.rbegin() == *"\n",
-            "%s - %s", testPrefix, "New line terminator check");
+            "%s - %s - exp %#02x (\\n) act %#02x", testPrefix, "New line terminator check",
+            '\n', *jsonParser.jsonLogMsg.rbegin());
 
     // Test prefix
     testOk(!jsonParser.prefix.compare(logMsgPrefix),
-            "%s - %s", testPrefix, "Prefix check");
+            "%s - %s - exp '%s' act '%s'", testPrefix, "Prefix check",
+            logMsgPrefix, jsonParser.prefix.c_str());
 
     // Test date format
     testOk(jsonParser.date.length() == 10 &&
             jsonParser.date.at(4) == *"-" &&
             jsonParser.date.at(7) == *"-",
-            "%s - %s", testPrefix, "Date format check");
+            "%s - %s - exp '%s' act '%s'", testPrefix, "Date format check",
+            "YYYY-MM-DD", jsonParser.date.c_str());
 
     // Test time format
     testOk(jsonParser.time.length() == 12 &&
             jsonParser.time.at(2) == *":" &&
             jsonParser.time.at(5) == *":" &&
             jsonParser.time.at(8) == *".",
-            "%s - %s", testPrefix, "Time format check");
+            "%s - %s - exp '%s' act '%s'", testPrefix, "Time format check",
+            "HH:MM:SS.ddd", jsonParser.time.c_str());
 
     // Test hostname
     char hostname[1024];
@@ -480,16 +484,19 @@ void commonTests(JsonParser &jsonParser, const char* pvname, const char * testPr
 
     // asLibRoutines changes the hostnames to lower-case; some OSs are not so kind.
     testOk(!epicsStrCaseCmp(hostname, jsonParser.host.c_str()),
-            "%s - %s", testPrefix, "Hostname check");
+            "%s - %s - exp '%s' act '%s'", testPrefix, "Hostname check",
+            hostname, jsonParser.host.c_str());
 
     // Test username
     char username[1024];
     osiGetUserName(username, 1024);
     testOk(!jsonParser.user.compare(username),
-            "%s - %s", testPrefix, "Username check");
+            "%s - %s - exp '%s' act '%s'", testPrefix, "Username check",
+            username, jsonParser.user.c_str());
 
     testOk(!jsonParser.pv.compare(pvname),
-            "%s - %s", testPrefix, "PV name check");
+            "%s - %s - exp '%s' act '%s'", testPrefix, "PV name check",
+            pvname, jsonParser.pv.c_str());
 
     //Test Metadata
     testOk(metadata_compare(jsonParser.metadata, logger->getMetadata()),
@@ -526,19 +533,23 @@ void testDbf(const char *pv, chtype type,
         for (size_t i = 0; i < json.newVal.size(); i++) {
             if (isnan(*(value1 + i))) {
                 testOk(!json.newVal.at(i).compare("Nan"),
-                        "%s - %s", testPrefix, "New value check");
+                        "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 1",
+                        i, "Nan", json.newVal.at(i).c_str());
             }
             else if (isinf(*(value1 + i) && *(value1 + i) > 0)) {
                 testOk(!json.newVal.at(i).compare("Infinity"),
-                        "%s - %s", testPrefix, "New value check");
+                        "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 1",
+                        i, "Infinity", json.newVal.at(i).c_str());
             }
             else if (isinf(*(value1 + i) && *(value1 + i) < 0)) {
                 testOk(!json.newVal.at(i).compare("-Infinity"),
-                        "%s - %s", testPrefix, "New value check");
+                        "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 1",
+                        i, "-Infinity", json.newVal.at(i).c_str());
             }
             else {
                 testOk(!json.newVal.at(i).compare(toString(*(value1 + i))),
-                        "%s - %s", testPrefix, "New value check");
+                        "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 1",
+                        i, toString(*(value1 + i)).c_str(), json.newVal.at(i).c_str());
             }
         }
     }
@@ -562,19 +573,23 @@ void testDbf(const char *pv, chtype type,
         for (size_t i = 0; i < json.newVal.size(); i++) {
             if (isnan(*(value2 + i))) {
                 testOk(!json.newVal.at(i).compare("Nan"),
-                        "%s - %s", testPrefix, "New value check");
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 2",
+                       i, "Nan", json.newVal.at(i).c_str());
             }
             else if (isinf(*(value2 + i)) && *(value2 + i) > 0) {
                 testOk(!json.newVal.at(i).compare("Infinity"),
-                        "%s - %s", testPrefix, "New value check");
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 2",
+                       i, "Infinity", json.newVal.at(i).c_str());
             }
             else if (isinf(*(value2 + i)) && *(value2 + i) < 0) {
                 testOk(!json.newVal.at(i).compare("-Infinity"),
-                        "%s - %s", testPrefix, "New value check");
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 2",
+                       i, "-Infinity", json.newVal.at(i).c_str());
             }
             else {
                 testOk(!json.newVal.at(i).compare(toString(*(value2 + i))),
-                        "%s - %s", testPrefix, "New value check");
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 2",
+                       i, toString(*(value2 + i)).c_str(), json.newVal.at(i).c_str());
             }
         }
 
@@ -582,19 +597,23 @@ void testDbf(const char *pv, chtype type,
         for (size_t i = 0; i < json.oldVal.size(); i++) {
             if (isnan(*(value1 + i))) {
                 testOk(!json.oldVal.at(i).compare("Nan"),
-                        "%s - %s", testPrefix, "New value check");
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "Old value check",
+                       i, "Nan", json.oldVal.at(i).c_str());
             }
             else if (isinf(*(value1 + i) && *(value1 + i) > 0)) {
                 testOk(!json.oldVal.at(i).compare("Infinity"),
-                        "%s - %s", testPrefix, "New value check");
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "Old value check",
+                       i, "Infinity", json.oldVal.at(i).c_str());
             }
             else if (isinf(*(value1 + i) && *(value1 + i) < 0)) {
                 testOk(!json.oldVal.at(i).compare("-Infinity"),
-                        "%s - %s", testPrefix, "New value check");
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "Old value check",
+                       i, "-Infinity", json.oldVal.at(i).c_str());
             }
             else {
                 testOk(!json.oldVal.at(i).compare(toString(*(value1 + i))),
-                        "%s - %s", testPrefix, "New value check");
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "Old value check",
+                       i, toString(*(value1 + i)).c_str(), json.oldVal.at(i).c_str());
             }
         }
     }
@@ -627,8 +646,11 @@ void testDbf<dbr_string_t>(const char *pv, chtype type,
 
         // New Value check
         for (size_t i = 0; i < json.newVal.size(); i++) {
-            testOk(!json.newVal.at(i).compare(value1 + i*MAX_STRING_SIZE),
-                    "%s - %s", testPrefix, "New value check");
+            char *cval = value1 + i*MAX_STRING_SIZE;
+            std::string sval(cval, std::min<size_t>(MAX_STRING_SIZE, strlen(cval)));
+            testOk(!json.newVal.at(i).compare(sval),
+                       "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 1",
+                       i, sval.c_str(), json.newVal.at(i).c_str());
         }
     }
 
@@ -649,14 +671,20 @@ void testDbf<dbr_string_t>(const char *pv, chtype type,
 
         // New Value check
         for (size_t i = 0; i < json.newVal.size(); i++) {
-            testOk(!json.newVal.at(i).compare(value2 + i*MAX_STRING_SIZE),
-                    "%s - %s", testPrefix, "New value check");
+            char *cval = value2 + i*MAX_STRING_SIZE;
+            std::string sval(cval, std::min<size_t>(MAX_STRING_SIZE, strlen(cval)));
+            testOk(!json.newVal.at(i).compare(sval),
+                   "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 2",
+                   i, sval.c_str(), json.newVal.at(i).c_str());
         }
 
         // Old Value check
         for (size_t i = 0; i < json.newVal.size(); i++) {
-            testOk(!json.oldVal.at(i).compare(value1 + i*MAX_STRING_SIZE),
-                "%s - %s", testPrefix, "Old value check");
+            char *cval = value1 + i*MAX_STRING_SIZE;
+            std::string sval(cval, std::min<size_t>(MAX_STRING_SIZE, strlen(cval)));
+            testOk(!json.oldVal.at(i).compare(sval),
+                   "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "Old value check",
+                   i, sval.c_str(), json.oldVal.at(i).c_str());
         }
     }
 }
@@ -688,7 +716,8 @@ void testDbf(const char *pv, chtype type,
 
         // New Value check
         testOk(!json.newVal.at(0).compare(std::string(value1, value1Size)),
-                "%s - %s", testPrefix, "New value check");
+               "%s - %s - exp '%s' act '%s'", testPrefix, "New value check 1",
+               std::string(value1, value1Size).c_str(), json.newVal.at(0).c_str());
     }
 
     // Second put -> we check new and old value
@@ -708,11 +737,13 @@ void testDbf(const char *pv, chtype type,
 
         // New Value check
         testOk(!json.newVal.at(0).compare(std::string(value2, value2Size)),
-                "%s - %s", testPrefix, "New value check");
+               "%s - %s - exp '%s' act '%s'", testPrefix, "New value check 2",
+               std::string(value2, value2Size).c_str(), json.newVal.at(0).c_str());
 
         // Old Value check
         testOk(!json.oldVal.at(0).compare(std::string(value1, value1Size)),
-                "%s - %s", testPrefix, "New value check");
+               "%s - %s - exp '%s' act '%s'", testPrefix, "Old value check",
+               std::string(value1, value1Size).c_str(), json.oldVal.at(0).c_str());
     }
 }
 
