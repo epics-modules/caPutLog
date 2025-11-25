@@ -93,11 +93,9 @@ static std::string incLogMsg;
 
 static void readFromClient(void *pParam)
 {
-    char recvbuf[BUFFER_SIZE];
+    char recvbuf[BUFFER_SIZE] = {0};
     int recvLength;
-    std::string
 
-    memset(recvbuf, 0, BUFFER_SIZE);
     recvLength = recv(insock, recvbuf, BUFFER_SIZE, 0);
     if (recvLength > 0) {
         incLogMsg.append(recvbuf, recvLength);
@@ -536,12 +534,12 @@ void testDbf(const char *pv, chtype type,
                         "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 1",
                         i, "Nan", json.newVal.at(i).c_str());
             }
-            else if (isinf(*(value1 + i) && *(value1 + i) > 0)) {
+            else if (isinf(*(value1 + i)) && *(value1 + i) > 0) {
                 testOk(!json.newVal.at(i).compare("Infinity"),
                         "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 1",
                         i, "Infinity", json.newVal.at(i).c_str());
             }
-            else if (isinf(*(value1 + i) && *(value1 + i) < 0)) {
+            else if (isinf(*(value1 + i)) && *(value1 + i) < 0) {
                 testOk(!json.newVal.at(i).compare("-Infinity"),
                         "%s - %s - elem %lu exp '%s' act '%s'", testPrefix, "New value check 1",
                         i, "-Infinity", json.newVal.at(i).c_str());
