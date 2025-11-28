@@ -37,6 +37,8 @@ INC += caPutJsonLogTask.h
 DBD += caPutJsonLog.dbd
 endif
 
+# Install config file for applications
+CFG += CONFIG_CAPUTLOG
 
 caPutLog_LIBS += $(EPICS_BASE_IOC_LIBS)
 caPutLog_SYS_LIBS_WIN32 += ws2_32
