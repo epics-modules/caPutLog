@@ -1,12 +1,16 @@
 *~
-O.*
 *.swp
 *.log
-bin/
+
+# EPICS ignores
+/cfg/
+/bin/
+/lib/
 /db/
-dbd/
-html/
-include/
-lib/
-templates/
+/dbd/
+/html/
+/include/
+/templates/
 /configure/*.local
+envPaths
+O.*
