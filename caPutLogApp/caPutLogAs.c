@@ -51,9 +51,7 @@
 #include <asTrapWrite.h>
 #include <epicsVersion.h>
 
-#define BASE_3_14 (EPICS_VERSION * 100 + EPICS_REVISION < 315)
-
-#if !(BASE_3_14)
+#if EPICS_VERSION_INT >= VERSION_INT(3,15,0,0)
 #include "dbChannel.h"
 #endif
 
@@ -114,7 +112,7 @@ void caPutLogAsStop()
 
 static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 {
-#if BASE_3_14
+#if EPICS_VERSION_INT < VERSION_INT(3,15,0,0)
     dbAddr *paddr = pmessage->serverSpecific;
 #else
     struct dbChannel *pchan = pmessage->serverSpecific;
@@ -143,7 +141,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 
         epicsSnprintf(plogData->userid, MAX_USERID_SIZE, "%s", pmessage->userid);
         epicsSnprintf(plogData->hostid, MAX_HOSTID_SIZE, "%s", pmessage->hostid);
-#if BASE_3_14
+#if EPICS_VERSION_INT < VERSION_INT(3,15,0,0)
         dbNameOfPV(paddr, plogData->pv_name, PVNAME_STRINGSZ);
 #else
         epicsSnprintf(plogData->pv_name, PVNAME_STRINGSZ, "%s", pv_name);
@@ -201,9 +199,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 
 int caPutLogMaxArraySize(short type)
 {
-#if !JSON_AND_ARRAYS_SUPPORTED
-    return 1;
-#else
+#if EPICS_VERSION >= 7
     static int const arraySizeLookUpTable [] = {
         MAX_ARRAY_SIZE_BYTES/MAX_STRING_SIZE,       /* DBR_STRING */
         MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt8),     /* DBR_CHAR */
@@ -222,9 +218,11 @@ int caPutLogMaxArraySize(short type)
     if (type >= DBR_STRING || type <= DBR_ENUM){
         return arraySizeLookUpTable[type];
     } else {
-        errlogSevPrintf(errlogMajor, "caPutLogAs: Array size for type %d can not be determind\n", type);
+        errlogSevPrintf(errlogMajor, "caPutLogAs: Array size for type %d can not be determined\n", type);
         return 1;
     }
+#else
+    return 1;
 #endif
 }
 

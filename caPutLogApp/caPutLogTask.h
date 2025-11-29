@@ -4,6 +4,7 @@
 #include <shareLib.h>
 #include <dbDefs.h>
 #include <epicsTime.h>
+#include <epicsVersion.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,7 +13,7 @@ extern "C" {
 #define MAX_USERID_SIZE 32
 #define MAX_HOSTID_SIZE 256
 
-#if JSON_AND_ARRAYS_SUPPORTED
+#if EPICS_VERSION >= 7
 #define MAX_ARRAY_SIZE_BYTES 400
 #else
 #define MAX_ARRAY_SIZE_BYTES 0
@@ -35,7 +36,7 @@ typedef union {
     epicsFloat64    v_double;
     char            v_string[MAX_STRING_SIZE];
 
-#if JSON_AND_ARRAYS_SUPPORTED
+#if EPICS_VERSION >= 7
     epicsInt8       a_int8[MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt8)];
     epicsUInt8      a_uint8[MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt8)];
     epicsInt16      a_int16[MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt16)];
