@@ -51,11 +51,7 @@
 #include <asTrapWrite.h>
 #include <epicsVersion.h>
 
-#define BASE_3_14 (EPICS_VERSION * 100 + EPICS_REVISION < 315)
-
-#if !(BASE_3_14)
 #include "dbChannel.h"
-#endif
 
 #define epicsExportSharedSymbols
 #include "caPutLog.h"
@@ -114,13 +110,9 @@ void caPutLogAsStop()
 
 static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 {
-#if BASE_3_14
-    dbAddr *paddr = pmessage->serverSpecific;
-#else
     struct dbChannel *pchan = pmessage->serverSpecific;
     dbAddr *paddr = &pchan->addr;
     const char *pv_name = pchan->name;
-#endif
     LOGDATA *plogData;
     long options, num_elm;
     long status;
@@ -143,11 +135,7 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 
         epicsSnprintf(plogData->userid, MAX_USERID_SIZE, "%s", pmessage->userid);
         epicsSnprintf(plogData->hostid, MAX_HOSTID_SIZE, "%s", pmessage->hostid);
-#if BASE_3_14
-        dbNameOfPV(paddr, plogData->pv_name, PVNAME_STRINGSZ);
-#else
         epicsSnprintf(plogData->pv_name, PVNAME_STRINGSZ, "%s", pv_name);
-#endif
 
         if (VALID_DB_REQ(paddr->field_type)) {
             plogData->type = paddr->field_type;
