@@ -18,6 +18,7 @@ jobs:
     env:
       CMP: ${{ matrix.cmp }}
       BCFG: ${{ matrix.configuration }}
+      BASE: ${{ matrix.base }}
       CI_CROSS_TARGETS: ${{ matrix.cross }}
       TEST: ${{ matrix.test }}
 
@@ -29,35 +30,53 @@ jobs:
           - os: ubuntu-latest
             cmp: gcc
             configuration: default
-            name: "Ub-24 default"
+            base: "7.0"
+            name: "Ub-24 Base-7.0 default"
 
           - os: ubuntu-latest
             cmp: gcc
             configuration: static
-            name: "Ub-24 static"
+            base: "7.0"
+            name: "Ub-24 Base-7.0 static"
 
           - os: windows-2022
             cmp: vs2022
             configuration: static
-            name: "Win-22 MSC-22 static"
+            base: "7.0"
+            name: "Win-22 Base-7.0 MSC-22 static"
 
           - os: ubuntu-latest
             cmp: gcc
             configuration: default
+            base: "7.0"
             cross: "RTEMS-pc386-qemu@4.10"
             test: NO
-            name: "Ub-24 gcc + RT-4.10"
+            name: "Ub-24 Base-7.0 gcc + RT-4.10"
 
           - os: ubuntu-latest
             cmp: gcc
             configuration: default
+            base: "7.0"
             cross: "RTEMS-pc686-qemu@5"
-            name: "Ub-24 gcc + RT-5.1 pc686"
+            name: "Ub-24 Base-7.0 gcc + RT-5.1 pc686"
 
           - os: macos-latest
             cmp: clang
             configuration: default
-            name: "MacOS clang"
+            base: "7.0"
+            name: "MacOS Base-7.0 clang"
+
+          - os: ubuntu-latest
+            cmp: gcc
+            configuration: default
+            base: "3.15"
+            name: "Ub-24 Base-3.15 default"
+
+          - os: windows-2022
+            cmp: vs2022
+            configuration: static
+            base: "3.15"
+            name: "Win-22 Base-3.15 MSC-22 static"
 
     steps:
     - uses: actions/checkout@v4
