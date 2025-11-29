@@ -831,7 +831,9 @@ bool CaPutJsonLogTask::compareValues(const LOGDATA *pLogData) {
     case DBR_DOUBLE:
         SINGLE_TYPE_COMPARE(double, sizeof(epicsFloat64));
     case DBR_STRING:
-        SINGLE_TYPE_COMPARE(string, MAX_STRING_SIZE);
+        // Doesn't mask "hidden" bytes (after NUL) for the sake of efficiency
+        // For string scalars, size == 1
+        return memcmp(pa->v_string, pb->v_string, size*MAX_STRING_SIZE) == 0;
     default:
         return 0;
     }
