@@ -300,7 +300,7 @@ private:
      * @return true If values are the same.
      * @return false  If values are not the same.
      */
-    bool compareValues(const LOGDATA *pLogData);
+    bool valuesAreEqual(const LOGDATA *pLogData);
 
     /**
      * @brief Get a string representation of the value stored in the ::VALUE.
