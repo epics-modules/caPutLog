@@ -28,14 +28,11 @@ INC += caPutLogAs.h
 DBD += caPutLog.dbd
 
 # Add support for json format and arrays
-# This requires EPICS base version 7.0.1 or higher
-ifdef BASE_7_0
 USR_CPPFLAGS += -DJSON_AND_ARRAYS_SUPPORTED
 caPutLog_SRCS += caPutJsonLogTask.cpp
 caPutLog_SRCS += caPutJsonLogShellCommands.cpp
 INC += caPutJsonLogTask.h
 DBD += caPutJsonLog.dbd
-endif
 
 
 caPutLog_LIBS += $(EPICS_BASE_IOC_LIBS)

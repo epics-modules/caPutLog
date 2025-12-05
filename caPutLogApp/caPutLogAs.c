@@ -189,9 +189,6 @@ static void caPutLogAs(asTrapWriteMessage *pmessage, int afterPut)
 
 int caPutLogMaxArraySize(short type)
 {
-#if !JSON_AND_ARRAYS_SUPPORTED
-    return 1;
-#else
     static int const arraySizeLookUpTable [] = {
         MAX_ARRAY_SIZE_BYTES/MAX_STRING_SIZE,       /* DBR_STRING */
         MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt8),     /* DBR_CHAR */
@@ -213,7 +210,6 @@ int caPutLogMaxArraySize(short type)
         errlogSevPrintf(errlogMajor, "caPutLogAs: Array size for type %d can not be determind\n", type);
         return 1;
     }
-#endif
 }
 
 long caPutLogActualArraySize(dbAddr * paddr)

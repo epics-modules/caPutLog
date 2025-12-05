@@ -12,11 +12,7 @@ extern "C" {
 #define MAX_USERID_SIZE 32
 #define MAX_HOSTID_SIZE 256
 
-#if JSON_AND_ARRAYS_SUPPORTED
 #define MAX_ARRAY_SIZE_BYTES 400
-#else
-#define MAX_ARRAY_SIZE_BYTES 0
-#endif
 
 #define DEFAULT_BURST_TIMEOUT 5.0
 
@@ -35,7 +31,7 @@ typedef union {
     epicsFloat64    v_double;
     char            v_string[MAX_STRING_SIZE];
 
-#if JSON_AND_ARRAYS_SUPPORTED
+    char            a_bytes[MAX_ARRAY_SIZE_BYTES];
     epicsInt8       a_int8[MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt8)];
     epicsUInt8      a_uint8[MAX_ARRAY_SIZE_BYTES/sizeof(epicsUInt8)];
     epicsInt16      a_int16[MAX_ARRAY_SIZE_BYTES/sizeof(epicsInt16)];
@@ -47,7 +43,6 @@ typedef union {
     epicsFloat32    a_float[MAX_ARRAY_SIZE_BYTES/sizeof(epicsFloat32)];
     epicsFloat64    a_double[MAX_ARRAY_SIZE_BYTES/sizeof(epicsFloat64)];
     char            a_string[MAX_ARRAY_SIZE_BYTES/MAX_STRING_SIZE][MAX_STRING_SIZE];
-#endif
 } VALUE;
 
 typedef struct {
