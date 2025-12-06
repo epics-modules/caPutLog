@@ -812,47 +812,24 @@ void CaPutJsonLogTask::calculateMax(VALUE *pres, const VALUE *pa, const VALUE *p
     memset(pres, 0, sizeof(*pres));
 }
 
-#define SINGLE_TYPE_COMPARE(_t, _s)                            \
-    if (pLogData->is_array)                                    \
-        return memcmp(pa->a_##_t, pb->a_##_t, size * _s) == 0; \
-    return pa->v_##_t == pb->v_##_t;
-
 bool CaPutJsonLogTask::compareValues(const LOGDATA *pLogData) {
     const VALUE *pa = &pLogData->old_value;
     const VALUE *pb = &pLogData->new_value.value;
-    const int size = pLogData->old_log_size;
 
     if (pLogData->is_array && pLogData->old_log_size != pLogData->new_log_size)
         return false;
 
-    switch (pLogData->type)
-    {
-    case DBR_CHAR:
-        SINGLE_TYPE_COMPARE(int8, sizeof(epicsInt8));
-    case DBR_UCHAR:
-        SINGLE_TYPE_COMPARE(uint8, sizeof(epicsUInt8));
-    case DBR_SHORT:
-        SINGLE_TYPE_COMPARE(int16, sizeof(epicsInt16));
-    case DBR_USHORT:
-    case DBR_ENUM:
-        SINGLE_TYPE_COMPARE(uint16, sizeof(epicsUInt16));
-    case DBR_LONG:
-        SINGLE_TYPE_COMPARE(int32, sizeof(epicsInt32));
-    case DBR_ULONG:
-        SINGLE_TYPE_COMPARE(uint32, sizeof(epicsUInt32));
-    case DBR_INT64:
-        SINGLE_TYPE_COMPARE(int64, sizeof(epicsInt64));
-    case DBR_UINT64:
-        SINGLE_TYPE_COMPARE(uint64, sizeof(epicsUInt64));
-    case DBR_FLOAT:
-        SINGLE_TYPE_COMPARE(float, sizeof(epicsFloat32));
-    case DBR_DOUBLE:
-        SINGLE_TYPE_COMPARE(double, sizeof(epicsFloat64));
-    case DBR_STRING:
-        SINGLE_TYPE_COMPARE(string, MAX_STRING_SIZE);
-    default:
-        return 0;
+    size_t size = pLogData->is_array ? pLogData->old_log_size : 1;
+    if(pLogData->type==DBR_STRING) {
+        for(size_t i=0; i<size; i++) {
+            if(strncmp(pa->a_string[i], pb->a_string[i], MAX_STRING_SIZE)!=0) {
+                return 0;
+            }
+        }
+    } else {
+        return memcmp(pa, pb, size*dbValueSize(pLogData->type))==0;
     }
+    return 1;
 }
 
 int CaPutJsonLogTask::fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval, short type, int index)
