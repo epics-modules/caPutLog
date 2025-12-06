@@ -30,6 +30,8 @@
 #include <asLib.h>
 #include <logClient.h>
 #include <epicsThread.h>
+#include <epicsMutex.h>
+#include <epicsGuard.h>
 #include <epicsAtomic.h>
 #include <dbAccessDefs.h>
 #include <epicsMath.h>
@@ -43,6 +45,7 @@
 #include "caPutLogTask.h"
 #include "caPutJsonLogTask.h"
 
+typedef epicsGuard<epicsMutex> guard_t;
 
 #define isDbrNumeric(type) ((type) > DBR_STRING && (type) <= DBR_ENUM)
 
@@ -78,7 +81,7 @@ CaPutJsonLogTask::CaPutJsonLogTask()
 CaPutJsonLogTask::~CaPutJsonLogTask()
 {
     clientItem *client, *nextclient;
-    epicsMutex::guard_t G(clientsMutex);
+    guard_t G(clientsMutex);
     nextclient = clients;
     clients = NULL;
     while (nextclient) {
@@ -108,7 +111,7 @@ caPutJsonLogStatus CaPutJsonLogTask::report(int level)
 
     if (clients != NULL) {
         clientItem *client;
-        epicsMutex::guard_t G(clientsMutex);
+        guard_t G(clientsMutex);
         for (client = clients; client; client = client->next) {
             logClientShow(client->caPutJsonLogClient, level);
         }
@@ -254,7 +257,7 @@ caPutJsonLogStatus CaPutJsonLogTask::configureServerLogging(const char* address)
     clientItem** pclient;
 
     // Parse the address
-    epicsMutex::guard_t G(clientsMutex);
+    guard_t G(clientsMutex);
     for (pclient = &clients; *pclient; pclient = &(*pclient)->next) {
         if (strcmp(address, (*pclient)->address) == 0) {
             fprintf (stderr, "caPutJsonLog: address %s already configured\n", address);
@@ -463,7 +466,11 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
     }
 
     // Configure yajl generator
-    yajl_gen handle = yajl_gen_alloc(NULL);
+    yajl_gen handle = yajl_gen_alloc(
+#ifndef EPICS_YAJL_VERSION
+        NULL, // v1 yajl_gen_config struct*.  v2 switched to yajl_gen_config() function
+#endif
+        NULL);
     if (handle == NULL) {
         errlogSevPrintf(errlogMinor, "caPutJsonLog: failed to allocate yajl handler\n");
         return caPutJsonLogError;
@@ -674,7 +681,12 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
 
     /* Get JSON as NULL terminated cstring */
     const unsigned char * buf;
-    size_t len = 0;
+#ifdef EPICS_YAJL_VERSION
+    size_t
+#else
+    unsigned int
+#endif
+        len = 0;
     yajl_gen_get_buf(handle, &buf, &len);
 
     /* Get a JSON as a string */
@@ -690,7 +702,7 @@ caPutJsonLogStatus CaPutJsonLogTask::buildJsonMsg(const VALUE *pold_value, const
 void CaPutJsonLogTask::logToServer(std::string &msg)
 {
     clientItem* client;
-    epicsMutex::guard_t G(clientsMutex);
+    guard_t G(clientsMutex);
     for (client = clients; client; client = client->next) {
         logClientSend (client->caPutJsonLogClient, msg.c_str());
     }
@@ -742,12 +754,14 @@ void CaPutJsonLogTask::calculateMin(VALUE *pres, const VALUE *pa, const VALUE *p
         case DBR_ULONG:
             pres->v_uint32 = std::min(pa->v_uint32, pb->v_uint32);
             return;
+#ifdef DBR_INT64
         case DBR_INT64:
             pres->v_int64 = std::min(pa->v_int64, pb->v_int64);
             return;
         case DBR_UINT64:
             pres->v_uint64 = std::min(pa->v_uint64, pb->v_uint64);
             return;
+#endif
         case DBR_FLOAT:
             pres->v_float = std::min(pa->v_float, pb->v_float);
             return;
@@ -755,6 +769,7 @@ void CaPutJsonLogTask::calculateMin(VALUE *pres, const VALUE *pa, const VALUE *p
             pres->v_double = std::min(pa->v_double, pb->v_double);
             return;
     }
+    memset(pres, 0, sizeof(*pres));
 }
 
 void CaPutJsonLogTask::calculateMax(VALUE *pres, const VALUE *pa, const VALUE *pb, short type)
@@ -779,12 +794,14 @@ void CaPutJsonLogTask::calculateMax(VALUE *pres, const VALUE *pa, const VALUE *p
         case DBR_ULONG:
             pres->v_uint32 = std::max(pa->v_uint32, pb->v_uint32);
             return;
+#ifdef DBR_INT64
         case DBR_INT64:
             pres->v_int64 = std::max(pa->v_int64, pb->v_int64);
             return;
         case DBR_UINT64:
             pres->v_uint64 = std::max(pa->v_uint64, pb->v_uint64);
             return;
+#endif
         case DBR_FLOAT:
             pres->v_float = std::max(pa->v_float, pb->v_float);
             return;
@@ -792,49 +809,27 @@ void CaPutJsonLogTask::calculateMax(VALUE *pres, const VALUE *pa, const VALUE *p
             pres->v_double = std::max(pa->v_double, pb->v_double);
             return;
     }
+    memset(pres, 0, sizeof(*pres));
 }
-
-#define SINGLE_TYPE_COMPARE(_t, _s)                            \
-    if (pLogData->is_array)                                    \
-        return memcmp(pa->a_##_t, pb->a_##_t, size * _s) == 0; \
-    return pa->v_##_t == pb->v_##_t;
 
 bool CaPutJsonLogTask::compareValues(const LOGDATA *pLogData) {
     const VALUE *pa = &pLogData->old_value;
     const VALUE *pb = &pLogData->new_value.value;
-    const int size = pLogData->old_log_size;
 
     if (pLogData->is_array && pLogData->old_log_size != pLogData->new_log_size)
         return false;
 
-    switch (pLogData->type)
-    {
-    case DBR_CHAR:
-        SINGLE_TYPE_COMPARE(int8, sizeof(epicsInt8));
-    case DBR_UCHAR:
-        SINGLE_TYPE_COMPARE(uint8, sizeof(epicsUInt8));
-    case DBR_SHORT:
-        SINGLE_TYPE_COMPARE(int16, sizeof(epicsInt16));
-    case DBR_USHORT:
-    case DBR_ENUM:
-        SINGLE_TYPE_COMPARE(uint16, sizeof(epicsUInt16));
-    case DBR_LONG:
-        SINGLE_TYPE_COMPARE(int32, sizeof(epicsInt32));
-    case DBR_ULONG:
-        SINGLE_TYPE_COMPARE(uint32, sizeof(epicsUInt32));
-    case DBR_INT64:
-        SINGLE_TYPE_COMPARE(int64, sizeof(epicsInt64));
-    case DBR_UINT64:
-        SINGLE_TYPE_COMPARE(uint64, sizeof(epicsUInt64));
-    case DBR_FLOAT:
-        SINGLE_TYPE_COMPARE(float, sizeof(epicsFloat32));
-    case DBR_DOUBLE:
-        SINGLE_TYPE_COMPARE(double, sizeof(epicsFloat64));
-    case DBR_STRING:
-        SINGLE_TYPE_COMPARE(string, MAX_STRING_SIZE);
-    default:
-        return 0;
+    size_t size = pLogData->is_array ? pLogData->old_log_size : 1;
+    if(pLogData->type==DBR_STRING) {
+        for(size_t i=0; i<size; i++) {
+            if(strncmp(pa->a_string[i], pb->a_string[i], MAX_STRING_SIZE)!=0) {
+                return 0;
+            }
+        }
+    } else {
+        return memcmp(pa, pb, size*dbValueSize(pLogData->type))==0;
     }
+    return 1;
 }
 
 int CaPutJsonLogTask::fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval, short type, int index)
@@ -860,10 +855,12 @@ int CaPutJsonLogTask::fieldVal2Str(char *pbuf, size_t buflen, const VALUE *pval,
         case DBR_DOUBLE:
             len = epicsSnprintf(pbuf, buflen, "%.17g", ((epicsFloat64 *)pval)[index]);
             break;
+#ifdef DBR_INT64
         case DBR_INT64:
             return epicsSnprintf(pbuf, buflen, "%lld", ((epicsInt64 *)pval)[index]);
         case DBR_UINT64:
             return epicsSnprintf(pbuf, buflen, "%llu", ((epicsUInt64 *)pval)[index]);
+#endif
         case DBR_STRING:
             return epicsSnprintf(pbuf, buflen, "%s", ((char *)pval) + index * MAX_STRING_SIZE);
         default:
