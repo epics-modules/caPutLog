@@ -7,8 +7,9 @@ Author: `Ben Franksen`_ (`HZB`_)
 About
 -----
 
-CaPutLog is an EPICS support module that provides logging for Channel Access
-put operations. The current version works with EPICS 3.14.8.2 and later and
+CaPutLog is an EPICS support module that provides logging for Channel Access and PV Access
+put operations. Support for PV Access put operations is available starting with EPICS 7.0.7.
+The current version works with EPICS 3.14.8.2 and later and
 is almost a complete re-write of the original (3.13 compatible) version that
 was written by V. Korobov (DESY). It is based on the generic iocLogClient
 that is part of the EPICS libCom. Starting a log server requires exactly the
@@ -16,10 +17,10 @@ same steps as for the regular iocLogServer, except that you probably want to
 use a different port. On the IOC side there are three routines to be called
 from the iocShell. See section `Setup`_ below for details.
 
-This module will send logs of CA puts in a text format to a remote logging
+This module will send logs of Channel Access and PV Access puts in a text format to a remote logging
 server. Currently it supports two output formats, **Original** and **JSON**.
 The JSON format is only supported with `EPICS`_ base versions 7.0.1 and later.
-
+PV Access put operations to IOCs running either the QSRV pvAccess server or QSRV2 from the PVXS module are supported.
 
 Download
 --------
@@ -37,6 +38,8 @@ Compatibility Matrix and Release Notes
 +---------+------------------+------------------+
 | Version | EPICS Release    | Release Notes    |
 +=========+==================+==================+
+|   4.2   | 3.15.9 .. 7.0.x  | `R4-2`_          |
++---------+------------------+------------------+
 |   4.1   | 3.15.9 .. 7.0.x  | `R4-1`_          |
 +---------+------------------+------------------+
 |   4.0   | 3.14.12 .. 7.0.x | `R4-0`_          |
@@ -401,6 +404,7 @@ If you have any problems with this module, send me (`Ben Franksen`_) a mail.
 .. _HZB: http://www.helmholtz-berlin.de/
 .. _EPICS: https://epics.anl.gov/
 .. _browse: https://github.com/epics-modules/caPutLog/commits/master
+.. _R4-2: releasenotes.rst#r4-2-changes-since-r4-1
 .. _R4-1: releasenotes.rst#r4-1-changes-since-r4-0
 .. _R4-0: releasenotes.rst#r4-0-changes-since-r3-7
 .. _R3-5: releasenotes.rst#r3-5-changes-since-r3-4
