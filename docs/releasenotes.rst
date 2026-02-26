@@ -19,7 +19,7 @@ R4-2: Changes since R4-1
 * Remove unused variables.
 
   
-  R4-1: Changes since R4-0
+R4-1: Changes since R4-0
 ------------------------
 
 * Floating-point numbers are now logged with the precision appropriate to
