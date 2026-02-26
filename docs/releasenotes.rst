@@ -1,7 +1,25 @@
 Release Notes
 =============
 
-R4-1: Changes since R4-0
+R4-2: Changes since R4-1
+------------------------
+
+* Improve caPutJsonLog support, including fixes to string comparisons.
+
+* Remove Base 3.14–specific code. As of caPutLog R4.1, Base 3.14 is no longer supported due to the use of epicsAtomic.
+
+* Update GitHub Actions workflow and configuration.
+
+* Prevent certain commands from being called before caPutLog initialization.
+
+* Improve and fix caPutJsonLog tests.
+
+* Increase the maximum hostname length.
+
+* Remove unused variables.
+
+  
+  R4-1: Changes since R4-0
 ------------------------
 
 * Floating-point numbers are now logged with the precision appropriate to
