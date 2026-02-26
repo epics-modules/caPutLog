@@ -9,7 +9,7 @@ About
 
 CaPutLog is an EPICS support module that provides logging for Channel Access and PV Access
 put operations. Support for PV Access put operations is available starting with EPICS 7.0.7.
-The current version works with EPICS 3.14.8.2 and later and
+The current version works with EPICS 3.15.9 and later and
 is almost a complete re-write of the original (3.13 compatible) version that
 was written by V. Korobov (DESY). It is based on the generic iocLogClient
 that is part of the EPICS libCom. Starting a log server requires exactly the
